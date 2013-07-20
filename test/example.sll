@@ -1,0 +1,17 @@
+/**
+* Example SLL program.
+*/  
+program example
+
+zero() = Z() 
+plusOne(x) = S(x)
+
+add(Z(), y) = y
+add(S(x), y) = S(add(x,y))
+
+even(Z()) = True()
+even(S(x)) = odd(x)
+odd(Z()) = False()
+odd(S(x)) = even(x)
+
+main = even(S(S(Z())))

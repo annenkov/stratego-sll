@@ -1,0 +1,26 @@
+%% Grammar for the SLL language
+%% By default, based on an example "entities" syntax
+module SLL
+
+imports Common
+
+exports
+
+  context-free start-symbols
+    Start
+
+  context-free syntax
+  
+    "program" ID Definition*               -> Start {cons("Program")}
+    "main" "=" Main                        -> Definition {cons("MainDef")}
+    Expr                                   -> Main {cons("Expr")}
+    FUNCNAME "(" {Var ","}* ")" "=" Expr   -> Definition {cons("FDef")}
+    FUNCNAME "(" Pattern "," { Var ","}* ")" "=" Expr 
+                                           -> Definition {cons("GDef")}
+    FUNCNAME "(" Pattern ")" "=" Expr   -> Definition {cons("GDef")}
+    CTOR"(" {Var ","}* ")"                 -> Pattern {cons("Pat")}
+    ID                                     -> Var {cons("DVar")}
+    FUNCNAME"(" {Expr ","}* ")"        -> Expr {cons("FCall")}
+    CTOR"(" {Expr ","}* ")"            -> Expr {cons("Ctor")}    
+    ID                                    -> Expr {cons("Var")}
+

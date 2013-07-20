@@ -1,0 +1,20 @@
+program list
+
+head(Cons(x, xs)) = x
+tail(Cons(x, xs)) = xs
+
+ignoreSecond(x, xs) = x
+ignoreFirst(x, xs) = xs
+
+isList(Nil()) = True()
+isList(Cons(x, xs)) = isList(xs)
+
+zeros() = Cons(Z(), zeros())
+
+plus1(x) = S(x)
+
+infiniteListOf(x) = Cons(x, infiniteListOf(x))
+
+main = head(tail(infiniteListOf(plus1(Z()))))
+//ignoreFirst(zeros(), plus1(Z())) 
+	//head(tail(infiniteListOf(plus1(Z()))))

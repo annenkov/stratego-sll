@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?eclipse version="3.0"?>
+
+<plugin>
+       <extension point="org.eclipse.imp.runtime.languageDescription">
+          <language extensions="sll" description="SLL" language="SLL" derivedFrom="DynamicRoot" validator="SLL.SLLValidator" validatorClass="SLL.SLLValidator"></language>
+       </extension>
+       <extension id="SLL.parser" name="SLL Parser" point="org.eclipse.imp.runtime.parser">
+          <parser class="SLL.SLLParseController" language="SLL">
+          </parser>
+       </extension>    
+    </plugin>

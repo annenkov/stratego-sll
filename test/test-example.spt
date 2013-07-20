@@ -1,0 +1,21 @@
+/**
+* Unit tests for the SLL language.
+*/
+module test-example
+
+language SLL
+
+test Eval F-function [[
+	program example
+        succ(x) = S(x)
+	    
+	    main = succ(Z())
+]] build run-main to "S(Z())"
+
+test Eval G-function [[
+	program example
+        add(Z(), y) = y
+        add(S(x), y) = S(add(x,y))
+
+        main = add(S(S(Z())), S(Z()))
+]] build run-main to "S(S(S(Z())))"

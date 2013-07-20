@@ -1,0 +1,24 @@
+
+module SLL-Builders
+
+imports SLL-Builders.generated
+
+builders
+                                                                      
+  // This file can be used for custom analysis and builder rules.     
+  //                                                                  
+  // See the imported file for a brief introduction and examples.     
+
+builders
+                                                                                                                            
+  provider : include/sll.ctree                                                                                              
+  provider : include/sll-java.jar                                                                                           
+                                                                                                                            
+  observer : editor-analyze                        (multifile)                                                              
+                                                                                                                            
+  builder  : "Get definition from index"  = get-definition (openeditor) (realtime) (meta) (source)
+  builder  : "Show index entries for all files"    = debug-index-show-all-files (openeditor) (realtime) (meta) (source)
+  builder  : "Show index entries for current file" = debug-index-show-current-file (openeditor) (realtime) (meta) (source)
+  builder  : "Run main" = run-main  (openeditor) (realtime)         
+                                                                                                                              
+  on save  : editor-save                                                                                                    
