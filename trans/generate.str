@@ -82,42 +82,36 @@ rules
   		where <not(lookup)> (a, env);
   		<debug(!"Not changing: ")> a
   
- 
-  eval1(r|prog) = rec e(try(r(|prog) ; e); (id, Ctor(id, map(try(rewrite-func(|prog))))); e)
+  // Canonical (for strategic term rewriting) version of eval
+  eval(r) = rec e(try(r; e); Ctor(id, map(e)))
    
-  // alternative rewrite-step and eval
+  // Alternative rewrite-step and eval (more suitable for tracing)
   
   rewrite-step-alt(|prog) = rewrite-func(|prog) <+ FCall(id, [rewrite-step(|prog)|id]) <+ Ctor(id, map(rewrite-step-alt(|prog)))
   
   is-complete = not(collect-one(?FCall(_,_)))
   
-  eval3(r) = rec e(r; (is-complete <+ e))
+  eval-alt(r) = rec e(r; (is-complete <+ e))
   
+  // Anamorphism on lists
   ana(unspool, finished): t -> [a|<if finished then ![] else ana(unspool, finished) end> y]
   with
   	(a,y) := <unspool> t
   
-  to-tuple: t -> (t,t)
-  
+   
+  // Anamorphism-based definition of trace
   eval-trace-ana(r) = ana((r; to-tuple), is-complete)
-  	 
-  
+  to-tuple: t -> (t,t)
+  	  
   rewrite-main-def-alt(|prog):
   	Expr(body) -> t
   	with
   		t := <reduce(rewrite-func(|prog))> body  		
-  
-  rewrite-trace(|prog, trace): (trace, e) -> (new-trace, result)
-  	where
-  		<debug> (trace, e);
-  		result := <rewrite-step(|prog)> e;
-  		<debug> result;
-  		new-trace := <conc> (trace, [result])
-  
+   
   rewrite-main-def(|prog):
   	Expr(body) -> t
   	with
-  		t := <eval3(rewrite-step-alt(|prog))> body
+  		t := <eval(rewrite-step(|prog))> body
   		
   rewrite-trace-main-def(|prog):
   	Expr(body) -> [body|t]
