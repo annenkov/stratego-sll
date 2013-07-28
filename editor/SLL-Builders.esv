@@ -16,9 +16,9 @@ builders
                                                                                                                             
   observer : editor-analyze                        (multifile)                                                              
                                                                                                                             
-  builder  : "Get definition from index"  = get-definition (openeditor) (realtime) (meta) (source)
   builder  : "Show index entries for all files"    = debug-index-show-all-files (openeditor) (realtime) (meta) (source)
   builder  : "Show index entries for current file" = debug-index-show-current-file (openeditor) (realtime) (meta) (source)
+  builder  : "Trace" = trace-main  (openeditor) (realtime) 
   builder  : "Run main" = run-main  (openeditor) (realtime)         
                                                                                                                               
   on save  : editor-save                                                                                                    

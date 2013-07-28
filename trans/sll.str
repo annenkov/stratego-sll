@@ -26,20 +26,19 @@ rules // Main editor interface (defined by editor/SLL-Builders and -References.e
       warnings := <collect-all(constraint-warning, conc)> ast;
       notes    := <collect-all(constraint-note, conc)> ast
   
-  get-definition:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      index-setup(|<language>, [project-path], $[[project-path]/[path]]);
-      <debug> <index-get-current-file>;
-      filename := <guarantee-extension(|"aterm")> path;
-      result   := <definition-of> selected
-      
   run-main:
   	(selected, position, ast, path, project-path) -> (filename, <pp-sll-string> result)
   	with
   		filename := <guarantee-extension(|"result")> path;
   		<collect-one(?MainDef(main-def))> selected;
       	result   := <rewrite-main-def(|ast)> main-def
+    
+  trace-main:
+  	(selected, position, ast, path, project-path) -> (filename, <map(pp-sll-string)> trace)
+  	with
+  		filename := <guarantee-extension(|"result")> path;
+  		<collect-one(?MainDef(main-def))> selected;
+      	trace := <rewrite-trace-main-def(|ast)> main-def
       
   // Prints the entries in the index of all files.
   debug-index-show-all-files:

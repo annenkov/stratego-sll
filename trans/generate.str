@@ -13,20 +13,6 @@ imports
   
 
 rules
-// Using dynamic rules
-  create-env:
-  	t -> t
-  	with
-  		<topdown(try(record-func-defs))> t
-  		
-  record-func-defs:
-  	FDef(name, vars, body) -> FDef(name, vars, body)
-  	with
-	  	rules(
-	  			func-def : name -> body
-	  		)
-	  		
-// end of dynamic rules section
 
   // Getting definition by explicit traversals 
   get-f-func-body(|prog):
@@ -48,7 +34,8 @@ rules
   		<collect-one(?GDef(name, Pat(ctor-name, ctor-vars*), vars*, body))> prog
   
   get-func-body(|prog) = get-g-func-body(|prog) <+ get-f-func-body(|prog)
-   	  		
+
+  // Unfolding and substitution  	  		
   rewrite-func(|prog):
   	func@FCall(name, args*) -> f
   	where
@@ -94,26 +81,60 @@ rules
   substitute(|env) : e@Var(a) -> e
   		where <not(lookup)> (a, env);
   		<debug(!"Not changing: ")> a
-  		
-  eval(r|prog) = rec e(try(r(|prog) ; e); Ctor(id, map(e)))
+  
+ 
+  eval1(r|prog) = rec e(try(r(|prog) ; e); (id, Ctor(id, map(try(rewrite-func(|prog))))); e)
+   
+  // alternative rewrite-step and eval
+  
+  rewrite-step-alt(|prog) = rewrite-func(|prog) <+ FCall(id, [rewrite-step(|prog)|id]) <+ Ctor(id, map(rewrite-step-alt(|prog)))
+  
+  is-complete = not(collect-one(?FCall(_,_)))
+  
+  eval3(r) = rec e(r; (is-complete <+ e))
+  
+  ana(unspool, finished): t -> [a|<if finished then ![] else ana(unspool, finished) end> y]
+  with
+  	(a,y) := <unspool> t
+  
+  to-tuple: t -> (t,t)
+  
+  eval-trace-ana(r) = ana((r; to-tuple), is-complete)
+  	 
   
   rewrite-main-def-alt(|prog):
   	Expr(body) -> t
   	with
   		t := <reduce(rewrite-func(|prog))> body  		
   
+  rewrite-trace(|prog, trace): (trace, e) -> (new-trace, result)
+  	where
+  		<debug> (trace, e);
+  		result := <rewrite-step(|prog)> e;
+  		<debug> result;
+  		new-trace := <conc> (trace, [result])
+  
   rewrite-main-def(|prog):
   	Expr(body) -> t
   	with
-  		t := <eval(rewrite-step|prog)> body
+  		t := <eval3(rewrite-step-alt(|prog))> body
   		
-  lookup-0:
-  	func -> f
+  rewrite-trace-main-def(|prog):
+  	Expr(body) -> [body|t]
   	with
-  		f := <index-lookup> func
+  		t := <eval-trace-ana(rewrite-step-alt(|prog))> body  		
+  		   	
+  // Using dynamic rules - not finished yet
+  create-env:
+  	t -> t
+  	with
+  		<topdown(try(record-func-defs))> t
   		
-  definition-of:
-    MainDef(Expr(body)) -> t
-    with    	
-    	<debug> <index-uri>;
-    	t := <nam-get-uses> body
+  record-func-defs:
+  	FDef(name, vars, body) -> FDef(name, vars, body)
+  	with
+	  	rules(
+	  			func-def : name -> body
+	  		)
+	  		
+// end of dynamic rules section    	
