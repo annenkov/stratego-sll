@@ -1,4 +1,4 @@
-module generate
+module interpreter
 
 imports
   libstratego-lib
@@ -82,7 +82,7 @@ rules
   		where <not(lookup)> (a, env);
   		<debug(!"Not changing: ")> a
   
-  // Canonical (for strategic term rewriting) version of eval
+  // Idiomatic (for strategic term rewriting) version of eval
   eval(r) = rec e(try(r; e); Ctor(id, map(e)))
    
   // Alternative rewrite-step and eval (more suitable for tracing)

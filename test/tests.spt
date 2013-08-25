@@ -1,7 +1,7 @@
 /**
 * Unit tests for the SLL language.
 */
-module test-example
+module tests
 
 language SLL
 
