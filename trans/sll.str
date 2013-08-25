@@ -10,7 +10,7 @@ imports
   lib/analysis-library.generated
   lib/analysis-library-internal.generated
   check
-  generate
+  interpreter
   refactor
 
 rules // Main editor interface (defined by editor/SLL-Builders and -References.esv)
