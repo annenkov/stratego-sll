@@ -1,9 +1,9 @@
 /**
 * Example SLL program.
-*/  
+*/
 program example
 
-zero() = Z() 
+zero() = Z()
 plusOne(x) = S(x)
 
 add(Z(), y) = y
@@ -14,5 +14,5 @@ even(S(x)) = odd(x)
 odd(Z()) = False()
 odd(S(x)) = even(x)
 
-main = add(S(S(Z())), S(Z())) 
-	//even(S(S(Z())))
+main = add(S(S(Z())), S(Z()))
+  //even(S(S(Z())))

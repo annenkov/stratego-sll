@@ -4,8 +4,8 @@ namespaces
     program
     f-function
     g-function
-    
+
 rules
-	Program(name, _): defines program name
+  Program(name, _): defines program name
     FDef(fname, agrs*, body): defines unique f-function fname
-    FCall(fname, args*): refers to f-function fname     
+    FCall(fname, args*): refers to f-function fname

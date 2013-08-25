@@ -10,125 +10,125 @@ imports
   lib/analysis-library-internal.generated
   lib/index-library.generated
   names
-  
+
 
 rules
 
-  // Getting definition by explicit traversals 
+  // Getting definition by explicit traversals
   get-f-func-body(|prog):
-  	FCall(name, args*) -> (body, <build-env> (vars*, args*))
-  	where
-  		<debug> (name, args*, prog);
-  		<collect-one(?FDef(name, vars*, body))> prog
-  
+    FCall(name, args*) -> (body, <build-env> (vars*, args*))
+    where
+      <debug> (name, args*, prog);
+      <collect-one(?FDef(name, vars*, body))> prog
+
   get-g-func-body(|prog):
-  	FCall(name,[Ctor(ctor-name, ctor-args*)]) -> 
-  	    (body, <build-env>(ctor-vars*, ctor-args*))
-  	where  		  	
-  		<collect-one(?GDef(name, Pat(ctor-name, ctor-vars*), body))> prog
-  	
+    FCall(name,[Ctor(ctor-name, ctor-args*)]) ->
+        (body, <build-env>(ctor-vars*, ctor-args*))
+    where
+      <collect-one(?GDef(name, Pat(ctor-name, ctor-vars*), body))> prog
+
   get-g-func-body(|prog):
-  	FCall(name,[Ctor(ctor-name, ctor-args*), args* ]) -> 
-  	    (body, <conc> (<build-env>(ctor-vars*, ctor-args*), <build-env>(vars*, args*)))  	
-  	where
-  		<collect-one(?GDef(name, Pat(ctor-name, ctor-vars*), vars*, body))> prog
-  
+    FCall(name,[Ctor(ctor-name, ctor-args*), args* ]) ->
+        (body, <conc> (<build-env>(ctor-vars*, ctor-args*), <build-env>(vars*, args*)))
+    where
+      <collect-one(?GDef(name, Pat(ctor-name, ctor-vars*), vars*, body))> prog
+
   get-func-body(|prog) = get-g-func-body(|prog) <+ get-f-func-body(|prog)
 
-  // Unfolding and substitution  	  		
+  // Unfolding and substitution
   rewrite-func(|prog):
-  	func@FCall(name, args*) -> f
-  	where
-  		<debug(!"Function: ")> func;
-  		(body, env) := <get-func-body(|prog)> func;
-  		<debug(!"Resolved body: ")> body;
-  		<debug(!"Env: ")> env;  		
-  		f := <substitute(|env)> body
-  	  	
-  rewrite-step(|prog) = rewrite-func(|prog) <+ FCall(id, [rewrite-step(|prog)|id])  	  		
-  
+    func@FCall(name, args*) -> f
+    where
+      <debug(!"Function: ")> func;
+      (body, env) := <get-func-body(|prog)> func;
+      <debug(!"Resolved body: ")> body;
+      <debug(!"Env: ")> env;
+      f := <substitute(|env)> body
+
+  rewrite-step(|prog) = rewrite-func(|prog) <+ FCall(id, [rewrite-step(|prog)|id])
+
   build-env:
-  	(vars*@[v|_], args*) -> env
-  	with
-  		env := <zip> (<map(?DVar(<id>))>vars*, args*)
-  		
+    (vars*@[v|_], args*) -> env
+    with
+      env := <zip> (<map(?DVar(<id>))>vars*, args*)
+
   build-env:
-  	(vars*@[v|_], [Ctor(n, []), args*]) -> env
-  	with
-  		<debug> (vars*, args*);
-  		env := <zip> (<map(?DVar(<id>))>vars*, args*)		
-  		
+    (vars*@[v|_], [Ctor(n, []), args*]) -> env
+    with
+      <debug> (vars*, args*);
+      env := <zip> (<map(?DVar(<id>))>vars*, args*)
+
   build-env:
-  	(_, []) -> []
+    (_, []) -> []
 
   substitute(|env) : ctor@Ctor(n, []) -> ctor
-  		
+
   substitute(|env) : Ctor(n, args*) -> t
-  	with
-  		<debug(!"Recursing on Ctor: ")> args*;
-  		t := Ctor(n, <map(substitute(|env))> args*)
-  		
+    with
+      <debug(!"Recursing on Ctor: ")> args*;
+      t := Ctor(n, <map(substitute(|env))> args*)
+
   substitute(|env) : FCall(n, args*) -> t
-  	with  		
-  		<debug(!"Recursing on FCall: ")> args*;
-  		t := FCall(n, <map(substitute(|env))> args*) 		
-    	
+    with
+      <debug(!"Recursing on FCall: ")> args*;
+      t := FCall(n, <map(substitute(|env))> args*)
+
   substitute(|env) : Var(a) -> arg
-  		where 
-  			arg := <lookup>(a, env);
-  			<debug(!$[Substitite: [a]--->])> arg 
-  		
+      where
+        arg := <lookup>(a, env);
+        <debug(!$[Substitite: [a]--->])> arg
+
   substitute(|env) : e@Var(a) -> e
-  		where <not(lookup)> (a, env);
-  		<debug(!"Not changing: ")> a
-  
+      where <not(lookup)> (a, env);
+      <debug(!"Not changing: ")> a
+
   // Idiomatic (for strategic term rewriting) version of eval
   eval(r) = rec e(try(r; e); Ctor(id, map(e)))
-   
+
   // Alternative rewrite-step and eval (more suitable for tracing)
-  
+
   rewrite-step-alt(|prog) = rewrite-func(|prog) <+ FCall(id, [rewrite-step(|prog)|id]) <+ Ctor(id, map(rewrite-step-alt(|prog)))
-  
+
   is-complete = not(collect-one(?FCall(_,_)))
-  
+
   eval-alt(r) = rec e(r; (is-complete <+ e))
-  
+
   // Anamorphism on lists
   ana(unspool, finished): t -> [a|<if finished then ![] else ana(unspool, finished) end> y]
   with
-  	(a,y) := <unspool> t
-  
-   
+    (a,y) := <unspool> t
+
+
   // Anamorphism-based definition of trace
   eval-trace-ana(r) = ana((r; to-tuple), is-complete)
   to-tuple: t -> (t,t)
-  	  
+
   rewrite-main-def-alt(|prog):
-  	Expr(body) -> t
-  	with
-  		t := <reduce(rewrite-func(|prog))> body  		
-   
+    Expr(body) -> t
+    with
+      t := <reduce(rewrite-func(|prog))> body
+
   rewrite-main-def(|prog):
-  	Expr(body) -> t
-  	with
-  		t := <eval(rewrite-step(|prog))> body
-  		
+    Expr(body) -> t
+    with
+      t := <eval(rewrite-step(|prog))> body
+
   rewrite-trace-main-def(|prog):
-  	Expr(body) -> [body|t]
-  	with
-  		t := <eval-trace-ana(rewrite-step-alt(|prog))> body  		
-  		   	
+    Expr(body) -> [body|t]
+    with
+      t := <eval-trace-ana(rewrite-step-alt(|prog))> body
+
   // Using dynamic rules - not finished yet
   create-env:
-  	t -> t
-  	with
-  		<topdown(try(record-func-defs))> t
-  		
+    t -> t
+    with
+      <topdown(try(record-func-defs))> t
+
   record-func-defs:
-  	FDef(name, vars, body) -> FDef(name, vars, body)
-  	with
-	  	rules(
-	  			func-def : name -> body
-	  		)
-	  		
-// end of dynamic rules section    	
+    FDef(name, vars, body) -> FDef(name, vars, body)
+    with
+      rules(
+          func-def : name -> body
+        )
+
+// end of dynamic rules section
