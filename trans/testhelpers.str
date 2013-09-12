@@ -1,0 +1,8 @@
+module testhelpers
+
+imports
+    include/SLL
+
+rules
+
+    get-defs(pat): Program(_, defs*) -> <filter(pat)> defs*

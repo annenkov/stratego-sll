@@ -1,0 +1,110 @@
+module conftree
+
+imports
+    libstratego-lib
+    libstratego-aterm
+    lib/editor-common.generated
+    include/SLL
+    interpreter
+    testhelpers
+
+signature
+    sorts
+        Step Tree Either
+    constructors
+        Transient   : Expr -> Step
+        Stop        : Step
+        Variants    : [Expr] -> Step
+
+        Node        : Expr * [Expr] -> Tree
+        Leaf        : Expr -> Tree
+
+        Left        : Expr -> Either
+        Right       : Expr -> Either
+rules
+
+    prettify-tree(pp) = topdown(try(pp))
+
+    build-conf-tree(|prog) = conf-tree1(rewrite-step-alt(|prog)|prog)
+    conf-tree(r|prog) = !Node(<id>, <!(<id>, []); ana-tree(r; wrap(|prog), map(stop-build))>)
+    conf-tree1(r|prog) = !Node(<id>, <!(<id>, []); ana-tree1(tree-step(r|prog))>)
+
+    tree-step(r|prog): (t@Ctor(_, args*), acc) -> Right((t, <map(!(<id>, [t|acc]))> args*))
+    where
+        <debug(!"Decompose: ")> t;
+        <not(is-complete)> t
+
+    tree-step(r|prog): (t, acc) -> Right((t, [(new-t, [t|acc])]))
+     where
+        <debug(!"Transient?")> t;
+        new-t := <r> t;
+        <debug(!"Transient: ")> t;
+        <not(is-complete <+ foldable(|acc))> t
+
+
+    tree-step(r|prog): (t, acc) -> Right((t, <map(!(<id>, [t|acc]))> res))
+    where
+        <debug(!"Variants?")> t;
+        res := <variants-r(|prog)> t;
+        <debug(!"Variants: ")> res;
+        <not(is-complete <+ foldable(|acc))> t
+
+    tree-step(r|prog): (t, acc) -> Left(t)
+    where
+        <is-complete <+ foldable(|acc)> t;
+        <debug(!"Foldable: ")> t
+
+    wrap(|prog): (t, acc) -> (t, [(t,[t|acc])])
+    where
+        <debug(!"Transient: ")> t;
+        <not(variants(|prog))> t
+
+
+    wrap(|prog): (t, acc) -> (t, <map(!(<id>, [t|acc]))> res)
+    where
+        <debug(!"Variants: ")> t;
+        res := <variants(|prog)> t
+
+    stop-build: (t, acc) -> res
+    where
+        res := <is-complete <+ foldable(|acc)> t
+
+    foldable(|acc): t -> <fetch(eq-mod-renaming(|t))> acc
+
+
+    ana-tree(unspool, finished): t -> Node(a, <if finished then ![] else map(ana-tree(unspool, finished)) end> y)
+    with
+        <debug(!"Acc: ")> <?(_, <id>)> t;
+        (a,y) := <unspool> t
+
+    ana-tree1(unspool): t ->  <ana-tree-helper(unspool)> <unspool> t
+    with
+        <debug(!"Acc: ")> <?(_, <id>)> t
+
+    ana-tree-helper(unspool): Left(t) -> Leaf(t)
+    ana-tree-helper(unspool): Right((t, y)) -> Node(t, <map(ana-tree1(unspool))> y)
+
+    variants-r(|prog) = variants(|prog) <+ FCall(id, map(variants-r(|prog)))
+
+    variants(|prog): fcall@FCall(f-name, [Var(_)|_]) -> <map(variants-step(|fcall))> g-defs*
+    where
+        g-defs* := <collect-all(?GDef(f-name, _, _, _)); ?[_|_]> prog;
+        <debug> g-defs*
+
+    variants-step(|f-call): GDef(name, pat, args*, body) -> res
+    where
+        <?FCall(f-name, [Var(var-name)|_])> f-call;
+        res := <substitute(|[(var-name, <pat2ctor> pat)])> f-call
+
+    pat2ctor: Pat(name, args*) -> Ctor(name, <topdown(try(\DVar(x) -> Var(x)\))> args*)
+
+    eq-mod-renaming(|t1): t2 -> <equal> (t1', t2')
+    where
+        <debug(!"Comparing")> (t1, t2);
+    	t1' := <erase-names> t1;
+    	t2' := <erase-names> t2
+
+    erase-names = topdown(try(?Var(_); !Var("_")))
+
+    test-eq: t -> <get-defs(?FDef("g", _, <id>) <+ ?FDef("f", _, <id>)); ?[t1, t2]; <eq-mod-renaming(|t1)> t2> t
+    test-not-eq: t -> <not(test-eq)> t
