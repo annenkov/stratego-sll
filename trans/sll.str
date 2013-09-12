@@ -11,6 +11,7 @@ imports
   lib/analysis-library-internal.generated
   check
   interpreter
+  conftree
   refactor
 
 rules // Main editor interface (defined by editor/SLL-Builders and -References.esv)
@@ -31,14 +32,25 @@ rules // Main editor interface (defined by editor/SLL-Builders and -References.e
     with
       filename := <guarantee-extension(|"result")> path;
       <collect-one(?MainDef(main-def))> selected;
-        result   := <rewrite-main-def(|ast)> main-def
+      result   := <rewrite-main-def(|ast)> main-def
 
   trace-main:
     (selected, position, ast, path, project-path) -> (filename, <map(pp-sll-string)> trace)
     with
       filename := <guarantee-extension(|"result")> path;
       <collect-one(?MainDef(main-def))> selected;
-        trace := <rewrite-trace-main-def(|ast)> main-def
+      trace := <rewrite-trace-main-def(|ast)> main-def
+
+  build-conf-tree:
+      (selected, position, ast, path, project-path) -> (filename, <prettify-tree(pp-sll-string)> conf-tree)
+    with
+      filename := <guarantee-extension(|"result")> path;
+      <collect-one(?MainDef(Expr(main-def)))> selected;
+      conf-tree := <build-conf-tree(|ast)> main-def
+
+  build-variants-for-main: p -> <map(pp-sll-string)> <variants(|p)> main-def
+    with
+        main-expr := <collect-one(?MainDef(Expr(main-def)))> p
 
   // Prints the entries in the index of all files.
   debug-index-show-all-files:

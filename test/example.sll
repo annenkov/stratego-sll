@@ -9,10 +9,14 @@ plusOne(x) = S(x)
 add(Z(), y) = y
 add(S(x), y) = S(add(x,y))
 
+
 even(Z()) = True()
 even(S(x)) = odd(x)
 odd(Z()) = False()
 odd(S(x)) = even(x)
 
-main = add(S(S(Z())), S(Z()))
+test(Z()) = Z()
+test(S(x)) = x
+
+main = add(add(x, Z()), Z())
   //even(S(S(Z())))
