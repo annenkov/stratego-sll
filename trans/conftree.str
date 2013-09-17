@@ -77,14 +77,15 @@ rules
         <debug(!"Acc: ")> <?(_, <id>)> t;
         (a,y) := <unspool> t
 
-    ana-tree1(unspool): t ->  <ana-tree-helper(unspool)> <unspool> t
+    ana-tree1(unspool): t -> <ana-tree-helper(unspool)> <unspool> t
     with
         <debug(!"Acc: ")> <?(_, <id>)> t
 
     ana-tree-helper(unspool): Left(t) -> Leaf(t)
     ana-tree-helper(unspool): Right((t, y)) -> Node(t, <map(ana-tree1(unspool))> y)
 
-    variants-r(|prog) = variants(|prog) <+ FCall(id, map(variants-r(|prog)))
+    variants-r(|prog) = variants(|prog) <+ (?FCall(name, [a|args*]); <variants-r(|prog)> a; inject(|name, args*))
+    inject(|name, args*) = map(!FCall(name, [<id>|args*]))
 
     variants(|prog): fcall@FCall(f-name, [Var(_)|_]) -> <map(variants-step(|fcall))> g-defs*
     where

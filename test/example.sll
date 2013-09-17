@@ -18,5 +18,5 @@ odd(S(x)) = even(x)
 test(Z()) = Z()
 test(S(x)) = x
 
-main = add(plusOne(x), Z())
+main = add(add(x, Z()), plusOne(Z()))
   //even(S(S(Z())))
