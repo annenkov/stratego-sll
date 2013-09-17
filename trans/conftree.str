@@ -96,7 +96,7 @@ rules
         <?FCall(f-name, [Var(var-name)|_])> f-call;
         res := <substitute(|[(var-name, <pat2ctor> pat)])> f-call
 
-    pat2ctor: Pat(name, args*) -> Ctor(name, <topdown(try(\DVar(x) -> Var(x)\))> args*)
+    pat2ctor: Pat(name, args*) -> Ctor(name, <topdown(try(\DVar(x) -> Var(<new> x)\))> args*)
 
     eq-mod-renaming(|t1): t2 -> <equal> (t1', t2')
     where

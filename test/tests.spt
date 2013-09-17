@@ -22,13 +22,6 @@ test Eval G-function [[
      main = add(S(S(Z())), S(Z()))
 ]] build run-main to "S(S(S(Z())))"
 
-test Variants [[
-     add(Z(), y) = y
-     add(S(x), y) = S(add(x,y))
-
-      main = add(x, Z())
-]] run build-variants-for-main to ["add(Z(),Z())", "add(S(x),Z())"]
-
 test Equal modulo renaming [[
         add(Z(), y) = y
         add(S(x), y) = S(add(x,y))
