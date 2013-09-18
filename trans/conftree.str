@@ -25,16 +25,15 @@ rules
 
     prettify-tree(pp) = topdown(try(pp))
 
-    build-conf-tree(|prog) = conf-tree1(rewrite-step-alt(|prog)|prog)
-    conf-tree(r|prog) = !Node(<id>, <!(<id>, []); ana-tree(r; wrap(|prog), map(stop-build))>)
-    conf-tree1(r|prog) = !Node(<id>, <!(<id>, []); ana-tree1(tree-step(r|prog))>)
+    build-conf-tree(|prog) = conf-tree(rewrite-step-alt(|prog)|prog)
+    conf-tree(r|prog) = !(<id>, []); ana-tree(drive(r|prog))
 
-    tree-step(r|prog): (t@Ctor(_, args*), acc) -> Right((t, <map(!(<id>, [t|acc]))> args*))
+    drive(r|prog): (t@Ctor(_, args*), acc) -> Right((t, <map(!(<id>, [t|acc]))> args*))
     where
         <debug(!"Decompose: ")> t;
         <not(is-complete)> t
 
-    tree-step(r|prog): (t, acc) -> Right((t, [(new-t, [t|acc])]))
+    drive(r|prog): (t, acc) -> Right((t, [(new-t, [t|acc])]))
      where
         <debug(!"Transient?")> t;
         new-t := <r> t;
@@ -42,49 +41,29 @@ rules
         <not(is-complete <+ foldable(|acc))> t
 
 
-    tree-step(r|prog): (t, acc) -> Right((t, <map(!(<id>, [t|acc]))> res))
+    drive(r|prog): (t, acc) -> Right((t, <map(!(<id>, [t|acc]))> res))
     where
         <debug(!"Variants?")> t;
         res := <variants-r(|prog)> t;
         <debug(!"Variants: ")> res;
         <not(is-complete <+ foldable(|acc))> t
 
-    tree-step(r|prog): (t, acc) -> Left(t)
+    drive(r|prog): (t, acc) -> Left(t)
     where
         <is-complete <+ foldable(|acc)> t;
         <debug(!"Foldable: ")> t
 
-    wrap(|prog): (t, acc) -> (t, [(t,[t|acc])])
-    where
-        <debug(!"Transient: ")> t;
-        <not(variants(|prog))> t
-
-
-    wrap(|prog): (t, acc) -> (t, <map(!(<id>, [t|acc]))> res)
-    where
-        <debug(!"Variants: ")> t;
-        res := <variants(|prog)> t
-
-    stop-build: (t, acc) -> res
-    where
-        res := <is-complete <+ foldable(|acc)> t
-
     foldable(|acc): t -> <fetch(eq-mod-renaming(|t))> acc
 
-
-    ana-tree(unspool, finished): t -> Node(a, <if finished then ![] else map(ana-tree(unspool, finished)) end> y)
-    with
-        <debug(!"Acc: ")> <?(_, <id>)> t;
-        (a,y) := <unspool> t
-
-    ana-tree1(unspool): t -> <ana-tree-helper(unspool)> <unspool> t
+    ana-tree(unspool): t -> <ana-tree-helper(unspool)> <unspool> t
     with
         <debug(!"Acc: ")> <?(_, <id>)> t
 
     ana-tree-helper(unspool): Left(t) -> Leaf(t)
-    ana-tree-helper(unspool): Right((t, y)) -> Node(t, <map(ana-tree1(unspool))> y)
+    ana-tree-helper(unspool): Right((t, y)) -> Node(t, <map(ana-tree(unspool))> y)
 
     variants-r(|prog) = variants(|prog) <+ (?FCall(name, [a|args*]); <variants-r(|prog)> a; inject(|name, args*))
+
     inject(|name, args*) = map(!FCall(name, [<id>|args*]))
 
     variants(|prog): fcall@FCall(f-name, [Var(_)|_]) -> <map(variants-step(|fcall))> g-defs*
