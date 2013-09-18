@@ -2,19 +2,7 @@ syntax: glob
 
 bin
 .cache
-include/SLL.def
-include/SLL-parenthesize.str
-include/SLL-Permissive.def
-include/SLL.generated.pp.af
-include/SLL.packed.esv
-include/SLL.pp.af
-include/SLL.rtg
-include/SLL.str
-include/SLL.tbl
-include/sll.rtree
-include/sll.ctree
-include/sll.ctree.dep
-include/sll.jar
+include/*
 editor/java/trans
 editor/SLL-*.generated.esv
 syntax/SLL*.generated.esv
