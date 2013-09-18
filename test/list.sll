@@ -6,9 +6,6 @@ tail(Cons(x, xs)) = xs
 ignoreSecond(x, xs) = x
 ignoreFirst(x, xs) = xs
 
-isList(Nil()) = True()
-isList(Cons(x, xs)) = isList(xs)
-
 zeros() = Cons(Z(), zeros())
 
 plus1(x) = S(x)
