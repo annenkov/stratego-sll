@@ -13,8 +13,10 @@ signature
         Step Tree Either
     constructors
         Transient   : Expr -> Step
+        Fold        : Expr * [String] -> Step
         Stop        : Step
-        Variants    : [Expr] -> Step
+        Variants    : [Pattern] * [Expr] -> Step
+        Decompose   : [Expr] -> Step
 
         Node        : Expr * [Expr] -> Tree
         Leaf        : Expr -> Tree
@@ -28,61 +30,81 @@ rules
     build-conf-tree(|prog) = conf-tree(rewrite-step-alt(|prog)|prog)
     conf-tree(r|prog) = !(<id>, []); ana-tree(drive(r|prog))
 
-    drive(r|prog): (t@Ctor(_, args*), acc) -> Right((t, <map(!(<id>, [t|acc]))> args*))
+    drive(r|prog): (t@Ctor(_,_), acc) -> Left(t)
     where
-        <debug(!"Decompose: ")> t;
-        <not(is-complete)> t
+        <is-complete> t
 
-    drive(r|prog): (t, acc) -> Right((t, [(new-t, [t|acc])]))
+    drive(r|prog): (t@Ctor(_, args*@[_|_]), acc) -> Decompose((t, <map(!(<id>, [t|acc]))> args*))
+    where
+        <not(is-complete)> t;
+        <debug(!"Decompose: ")> t
+
+    drive(r|prog): (t@FCall(_, _), acc) -> Transient((t, (new-t, [t|acc])))
      where
         <debug(!"Transient?")> t;
         new-t := <r> t;
-        <debug(!"Transient: ")> t;
-        <not(is-complete <+ foldable(|acc))> t
+        <debug(!"Transient: ")> t
 
 
-    drive(r|prog): (t, acc) -> Right((t, <map(!(<id>, [t|acc]))> res))
+    drive(r|prog): (t@FCall(_, _), acc) -> Variants(pats*, (t, <map(!(<r>, [t|acc]))> funcalls*))
     where
         <debug(!"Variants?")> t;
-        res := <variants-r(|prog)> t;
-        <debug(!"Variants: ")> res;
-        <not(is-complete <+ foldable(|acc))> t
+        (pats*, funcalls*) := <variants-r(|prog)> t;
+        <debug(!"Variants: ")> funcalls*;
+        <not(foldable(|acc))> t
 
-    drive(r|prog): (t, acc) -> Left(t)
+    drive(r|prog): (t@FCall(_, _), acc) -> Fold(folded-to, renamings)
     where
-        <is-complete <+ foldable(|acc)> t;
-        <debug(!"Foldable: ")> t
+        (folded-to, renamings) := <foldable(|acc)> t;
+        <debug(!"Foldable: ")> (t, folded-to)
 
-    foldable(|acc): t -> <fetch(eq-mod-renaming(|t))> acc
+    foldable(|acc): t -> (t', renamings)
+    where
+        <debug> t;
+        t' := <getfirst(eq-mod-renaming(|t))> acc;
+        renamings := <zip> (<collect-all(?Var(<id>))> t', <collect-all(?Var(_))> t)
 
-    ana-tree(unspool): t -> <ana-tree-helper(unspool)> <unspool> t
-    with
-        <debug(!"Acc: ")> <?(_, <id>)> t
-
-    ana-tree-helper(unspool): Left(t) -> Leaf(t)
-    ana-tree-helper(unspool): Right((t, y)) -> Node(t, <map(ana-tree(unspool))> y)
+    ana-tree(unspool): a ->
+        <switch unspool
+            case ?Left(t): !Leaf(t)
+            case ?Fold(t, renamings): !Leaf(Fold(t, renamings))
+            case ?Decompose((t, y)): !Node(t, Decompose(<map(ana-tree(unspool))> y))
+            case ?Variants(pats*, (t, y)): !Node(t, Variants(pats*, <map(ana-tree(unspool))> y))
+            case ?Transient((t, y)): !Node(t, Transient(<ana-tree(unspool)> y))
+        end> a
+        with
+            <debug> a
 
     variants-r(|prog) = variants(|prog) <+ (?FCall(name, [a|args*]); <variants-r(|prog)> a; inject(|name, args*))
 
-    inject(|name, args*) = map(!FCall(name, [<id>|args*]))
+    inject(|name, args*) = (id, map(!FCall(name, [<id>|args*])))
 
-    variants(|prog): fcall@FCall(f-name, [Var(_)|_]) -> <map(variants-step(|fcall))> g-defs*
+    variants(|prog): fcall@FCall(f-name, [Var(_)|_]) -> (pats*, fcalls*)
     where
         g-defs* := <collect-all(?GDef(f-name, _, _, _)); ?[_|_]> prog;
-        <debug> g-defs*
+        res := <map(variants-step(|fcall))> g-defs*;
+        pats* := <map(?(<id>, _))> res;
+        fcalls* := <map(?(_, <id>))> res;
+        <debug> res
 
-    variants-step(|f-call): GDef(name, pat, args*, body) -> res
+    variants-step(|f-call): GDef(name, pat, args*, body) -> (new-pat, res)
     where
         <?FCall(f-name, [Var(var-name)|_])> f-call;
-        res := <substitute(|[(var-name, <pat2ctor> pat)])> f-call
+        new-pat := <pat-with-new-vars> pat;
+        res := <substitute(|[(var-name, <pat2ctor> new-pat)])> f-call
 
-    pat2ctor: Pat(name, args*) -> Ctor(name, <topdown(try(\DVar(x) -> Var(<new> x)\))> args*)
+    pat-with-new-vars: Pat(n, a*) -> Pat(n, new-vars*)
+    with
+        new-vars* := <topdown(try(\DVar(_) -> DVar(<new>)\))> a*
 
-    eq-mod-renaming(|t1): t2 -> <equal> (t1', t2')
+
+    pat2ctor: Pat(name, args*) -> Ctor(name, <topdown(try(\DVar(x) -> Var(x)\))> args*)
+    //pat2ctor: Pat(name, args*) -> Ctor(name, <topdown(try(\DVar(x) -> Var(<new>)\))> args*)
+
+    eq-mod-renaming(|t1): t2 -> t2
     where
         <debug(!"Comparing")> (t1, t2);
-    	t1' := <erase-names> t1;
-    	t2' := <erase-names> t2
+    	<equal> (<erase-names> t1, <erase-names> t2)
 
     erase-names = topdown(try(?Var(_); !Var("_")))
 

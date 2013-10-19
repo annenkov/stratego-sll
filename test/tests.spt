@@ -25,7 +25,7 @@ test Eval G-function [[
 test Lazy evaluation [[
     head(Cons(x, xs)) = x
     tail(Cons(x, xs)) = xs
-    
+
     // infinite list of Z()
     zeros() = Cons(Z(), zeros())
 
@@ -47,3 +47,18 @@ test Not equal modulo renaming [[
         f(x) = add(S(S(x)), Z())
         g(y) = add(S(y), Z())
 ]] run test-not-eq
+
+test Generation 1[[
+    plusOne(x) = S(x)
+
+    main = plusOne(plusOne(x))
+
+]] run test-gen to []
+
+test Generation 2[[
+    add(Z(), y) = y
+    add(S(x), y) = S(add(x,y))
+
+    main = add(x, Z())
+
+]] run test-gen to []

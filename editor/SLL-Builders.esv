@@ -21,5 +21,6 @@ builders
   builder  : "Trace" = trace-main  (openeditor) (realtime)
   builder  : "Run main" = run-main  (openeditor) (realtime)
   builder  : "Build configuration tree" = build-conf-tree  (openeditor) (realtime)
+  builder  : "Transform" = transform  (openeditor) (realtime)
 
   on save  : editor-save

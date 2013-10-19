@@ -13,6 +13,7 @@ imports
   interpreter
   conftree
   refactor
+  gen
 
 rules // Main editor interface (defined by editor/SLL-Builders and -References.esv)
 
@@ -44,13 +45,17 @@ rules // Main editor interface (defined by editor/SLL-Builders and -References.e
   build-conf-tree:
       (selected, position, ast, path, project-path) -> (filename, <prettify-tree(pp-sll-string)> conf-tree)
     with
-      filename := <guarantee-extension(|"result")> path;
+      filename := <guarantee-extension(|"aterm")> path;
       <collect-one(?MainDef(Expr(main-def)))> selected;
       conf-tree := <build-conf-tree(|ast)> main-def
 
-  build-variants-for-main: p -> <map(pp-sll-string)> <variants(|p)> main-def
-    with
-        main-expr := <collect-one(?MainDef(Expr(main-def)))> p
+
+  transform: (selected, position, ast, path, project-path) -> (filename, <pp-sll-string> prog)
+  with
+      filename := <concat-strings> [<remove-extension> path, ".trans.sll"];
+      <collect-one(?MainDef(Expr(main-def)))> selected;
+      prog := <transform-program(|ast)> main-def
+
 
   // Prints the entries in the index of all files.
   debug-index-show-all-files:
