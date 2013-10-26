@@ -49,12 +49,25 @@ rules // Main editor interface (defined by editor/SLL-Builders and -References.e
       <collect-one(?MainDef(Expr(main-def)))> selected;
       conf-tree := <build-conf-tree(|ast)> main-def
 
+  deforest-tree:
+      (selected, position, ast, path, project-path) -> (filename, <prettify-tree(pp-sll-string)> conf-tree)
+    with
+      filename := <guarantee-extension(|"aterm")> path;
+      <collect-one(?MainDef(Expr(main-def)))> selected;
+      conf-tree := <build-conf-tree(|ast); simplify> main-def
+
 
   transform: (selected, position, ast, path, project-path) -> (filename, <pp-sll-string> prog)
   with
       filename := <concat-strings> [<remove-extension> path, ".trans.sll"];
       <collect-one(?MainDef(Expr(main-def)))> selected;
       prog := <transform-program(|ast)> main-def
+
+ deforest: (selected, position, ast, path, project-path) -> (filename, <pp-sll-string> prog)
+  with
+      filename := <concat-strings> [<remove-extension> path, ".trans.sll"];
+      <collect-one(?MainDef(Expr(main-def)))> selected;
+      prog := <deforest-program(|ast)> main-def
 
 
   // Prints the entries in the index of all files.

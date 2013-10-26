@@ -27,7 +27,15 @@ rules
 
     prettify-tree(pp) = topdown(try(pp))
 
-    build-conf-tree(|prog) = conf-tree(rewrite-step-alt(|prog)|prog)
+    build-conf-tree(|prog): t -> res
+    with
+        // rules(
+        //     trace := []
+        //     );
+        res := <conf-tree(rewrite-step-alt(|prog)|prog)> t;
+        <debug> <all-keys-trace>
+
+
     conf-tree(r|prog) = !(<id>, []); ana-tree(drive(r|prog))
 
     drive(r|prog): (t@Ctor(_,_), acc) -> Left(t)
@@ -41,17 +49,27 @@ rules
 
     drive(r|prog): (t@FCall(_, _), acc) -> Transient((t, (new-t, [t|acc])))
      where
-        <debug(!"Transient?")> t;
         new-t := <r> t;
-        <debug(!"Transient: ")> t
+        <debug(!"Transient: ")> t;
+     // rules (
+     // 	trace := [t|<trace>]
+     // )
+     rules (
+        trace:+ t -> t
+     )
 
 
     drive(r|prog): (t@FCall(_, _), acc) -> Variants(pats*, (t, <map(!(<r>, [t|acc]))> funcalls*))
     where
-        <debug(!"Variants?")> t;
         (pats*, funcalls*) := <variants-r(|prog)> t;
         <debug(!"Variants: ")> funcalls*;
-        <not(foldable(|acc))> t
+        <not(foldable(|acc))> t;
+        // rules (
+        //   trace := [t|<trace>]
+        // )
+        rules (
+        trace:+ t -> t
+        )
 
     drive(r|prog): (t@FCall(_, _), acc) -> Fold(folded-to, renamings)
     where
@@ -60,20 +78,18 @@ rules
 
     foldable(|acc): t -> (t', renamings)
     where
-        <debug> t;
-        t' := <getfirst(eq-mod-renaming(|t))> acc;
+        <debug(!"Acc: ")> <all-keys-trace>;
+        t' := <getfirst(eq-mod-renaming(|t))> <all-keys-trace>;
         renamings := <zip> (<collect-all(?Var(<id>))> t', <collect-all(?Var(_))> t)
 
-    ana-tree(unspool): a ->
-        <switch unspool
+    ana-tree(unspool) =
+        switch unspool
             case ?Left(t): !Leaf(t)
             case ?Fold(t, renamings): !Leaf(Fold(t, renamings))
             case ?Decompose((t, y)): !Node(t, Decompose(<map(ana-tree(unspool))> y))
             case ?Variants(pats*, (t, y)): !Node(t, Variants(pats*, <map(ana-tree(unspool))> y))
             case ?Transient((t, y)): !Node(t, Transient(<ana-tree(unspool)> y))
-        end> a
-        with
-            <debug> a
+        end
 
     variants-r(|prog) = variants(|prog) <+ (?FCall(name, [a|args*]); <variants-r(|prog)> a; inject(|name, args*))
 
@@ -84,14 +100,19 @@ rules
         g-defs* := <collect-all(?GDef(f-name, _, _, _)); ?[_|_]> prog;
         res := <map(variants-step(|fcall))> g-defs*;
         pats* := <map(?(<id>, _))> res;
-        fcalls* := <map(?(_, <id>))> res;
-        <debug> res
+        fcalls* := <map(?(_, <id>))> res
 
     variants-step(|f-call): GDef(name, pat, args*, body) -> (new-pat, res)
     where
-        <?FCall(f-name, [Var(var-name)|_])> f-call;
+        <?FCall(f-name, [Var(var-name)|vars*])> f-call;
         new-pat := <pat-with-new-vars> pat;
-        res := <substitute(|[(var-name, <pat2ctor> new-pat)])> f-call
+        <debug(!"Variant step: ")> (var-name, <pat2ctor> new-pat);
+        res := <subst-once(|Var(var-name), <pat2ctor> new-pat)> f-call
+
+    subst-once(|t, t'): FCall(name, args*) -> FCall(name, subst-args*)
+    where
+        <debug> (t, t', args*);
+        subst-args*  := <oncetd(?t; !t')> args*
 
     pat-with-new-vars: Pat(n, a*) -> Pat(n, new-vars*)
     with
@@ -99,14 +120,22 @@ rules
 
 
     pat2ctor: Pat(name, args*) -> Ctor(name, <topdown(try(\DVar(x) -> Var(x)\))> args*)
-    //pat2ctor: Pat(name, args*) -> Ctor(name, <topdown(try(\DVar(x) -> Var(<new>)\))> args*)
 
     eq-mod-renaming(|t1): t2 -> t2
     where
-        <debug(!"Comparing")> (t1, t2);
+        <debug(!"Comparing")> (<pp-sll-string> t1, <pp-sll-string> t2);
     	<equal> (<erase-names> t1, <erase-names> t2)
 
     erase-names = topdown(try(?Var(_); !Var("_")))
+
+    simplify = bottomup(try(\ Node(t, Transient(n)) -> n \))
+    remove-transient: Node(t, Transient(n)) -> n
+    where
+        <not(is-base(|t))> n
+
+    is-base(|t): t -> <collect-one(?Fold(t, _))> t
+    where
+        <debug(!"Is base: ")> t
 
     test-eq: t -> <get-defs(?FDef("g", _, <id>) <+ ?FDef("f", _, <id>)); ?[t1, t2]; <eq-mod-renaming(|t1)> t2> t
     test-not-eq: t -> <not(test-eq)> t

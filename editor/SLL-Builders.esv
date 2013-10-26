@@ -20,7 +20,9 @@ builders
   builder  : "Show index entries for current file" = debug-index-show-current-file (openeditor) (realtime) (meta) (source)
   builder  : "Trace" = trace-main  (openeditor) (realtime)
   builder  : "Run main" = run-main  (openeditor) (realtime)
-  builder  : "Build configuration tree" = build-conf-tree  (openeditor) (realtime)
+  builder  : "Build configuration tree" = build-conf-tree  (openeditor)
+  builder  : "Build simplified configuration tree" = deforest-tree  (openeditor) (realtime)
   builder  : "Transform" = transform  (openeditor) (realtime)
+  builder  : "Deforest" = deforest  (openeditor) (realtime)
 
   on save  : editor-save

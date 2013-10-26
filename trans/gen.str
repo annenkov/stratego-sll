@@ -10,17 +10,18 @@ imports
 rules
 
     transform-program(|prog) = build-conf-tree(|prog); generate-program
+    deforest-program(|prog) = build-conf-tree(|prog); simplify; generate-program
 
     generate-program: tree -> Program("prog", <conc> (defs*, [MainDef(Expr(call))]))
     with
         (call, defs*) := <gen> tree
 
-    gen: Node(t1, Transient(t2)) -> (call1, [FDef(name, <map(\Var(x) -> DVar(x)\)>args, call2)|defs*])
+    gen: Node(t1, Transient(t2)) -> (call1, [FDef(name, <map(\Var(x) -> DVar(x)\)> args, call2)|defs*])
     with
         args := <collect-vars> t1;
         name := <new>;
         call1 := FCall(name, args);
-        <debug(!"Gen transient")> call1;
+        <debug(!"Gen transient")> (<pp-sll-string> call1, <pp-sll-string> t1);
         (call2, defs*) := <gen> t2;
     rules (
         mapping:+ t1 -> call1
@@ -37,13 +38,12 @@ rules
         args := <collect-vars> t1;
         name := <new>;
         call1 := FCall(name, args);
-    rules (
-        mapping:+ t1 -> call1
-        )
-    with
-        <debug(!"Gen variants: ")> call1;
+	    rules (
+	        mapping:+ t1 -> call1
+	        );
+        <debug(!"Gen variants")> (<pp-sll-string> call1, <pp-sll-string> t1, args);
         (calls*, defs*) := <gen'> t*;
-        gdefs* := <map(make-gdef(|name))> <zip> (pats*, calls*);
+        gdefs* := <map(make-gdef(|name, args))> <zip> (pats*, calls*);
         <debug(!"G-defs: ")> gdefs*
 
     gen: Leaf(Fold(t, renamings)) -> (<substitute(|renamings)> t1, [])
@@ -53,7 +53,12 @@ rules
 
     gen: Leaf(t) -> (t, [])
 
-    make-gdef(|name): (pat, body) -> GDef(name, pat, [], body)
+    make-gdef(|name, args): (pat, body) -> GDef(name, pat, <map(\Var(x) -> DVar(x)\)> args', body)
+    with
+    	args' := <?[_|<id>]> args
+        // pat-vars := <map(\DVar(x) -> Var(x)\)> <collect-all(?DVar(_))> pat;
+        // args' := <filter(not(!(<id>, pat-vars); elem))> args;
+        // <debug(!"Gdef vars")> (args', <map(\Var(x) -> DVar(x)\)> args, pat-vars)
 
     gen': t* -> t'
     with
@@ -68,4 +73,4 @@ rules
         conf-tree := <build-conf-tree(|t)> e;
         new-prog := <generate-program> conf-tree
 
-    collect-vars = collect-all(?Var(x))
+    collect-vars = collect-all(?Var(_), conc)
