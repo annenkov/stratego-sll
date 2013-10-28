@@ -17,10 +17,9 @@ exports
     FUNCNAME "(" {Var ","}* ")" "=" Expr              -> Definition {cons("FDef")}
     FUNCNAME "(" Pattern GDefVars ")" "=" Expr        -> Definition {cons("GDef")}
     {Var ","}*                                        -> GDefVars
-    "," {Var ","}*                                    -> GDefVars {bracket}
+    "," {Var ","}+                                    -> GDefVars
     CTOR"(" {Var ","}* ")"                            -> Pattern {cons("Pat")}
     ID                                                -> Var {cons("DVar")}
     FUNCNAME"(" {Expr ","}* ")"                       -> Expr {cons("FCall")}
     CTOR"(" {Expr ","}* ")"                           -> Expr {cons("Ctor")}
     ID                                                -> Expr {cons("Var")}
-

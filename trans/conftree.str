@@ -27,13 +27,12 @@ rules
 
     prettify-tree(pp) = topdown(try(pp))
 
-    build-conf-tree(|prog): t -> res
+    build-conf-tree(|prog): t -> <conf-tree(rewrite-step-alt(|prog)|prog)>
     with
-        // rules(
-        //     trace := []
-        //     );
-        res := <conf-tree(rewrite-step-alt(|prog)|prog)> t;
-        <debug> <all-keys-trace>
+        rules(
+            trace := []
+            )
+
 
 
     conf-tree(r|prog) = !(<id>, []); ana-tree(drive(r|prog))
@@ -51,12 +50,12 @@ rules
      where
         new-t := <r> t;
         <debug(!"Transient: ")> t;
-     // rules (
-     // 	trace := [t|<trace>]
-     // )
      rules (
-        trace:+ t -> t
+     	trace := [t|<trace>]
      )
+     // rules (
+     //    trace:+ t -> t
+     // )
 
 
     drive(r|prog): (t@FCall(_, _), acc) -> Variants(pats*, (t, <map(!(<r>, [t|acc]))> funcalls*))
@@ -64,11 +63,8 @@ rules
         (pats*, funcalls*) := <variants-r(|prog)> t;
         <debug(!"Variants: ")> funcalls*;
         <not(foldable(|acc))> t;
-        // rules (
-        //   trace := [t|<trace>]
-        // )
         rules (
-        trace:+ t -> t
+          trace := [t|<trace>]
         )
 
     drive(r|prog): (t@FCall(_, _), acc) -> Fold(folded-to, renamings)
@@ -78,8 +74,9 @@ rules
 
     foldable(|acc): t -> (t', renamings)
     where
-        <debug(!"Acc: ")> <all-keys-trace>;
-        t' := <getfirst(eq-mod-renaming(|t))> <all-keys-trace>;
+        <debug(!"Acc: ")> <map(pp-sll-string)> <reverse> <trace>;
+        // using strait or reverse <trace> for serching foldable nodes gives different configuration trees
+        t' := <getfirst(eq-mod-renaming(|t))> <reverse> <trace>;
         renamings := <zip> (<collect-all(?Var(<id>))> t', <collect-all(?Var(_))> t)
 
     ana-tree(unspool) =

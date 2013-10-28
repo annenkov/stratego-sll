@@ -56,9 +56,7 @@ rules
     make-gdef(|name, args): (pat, body) -> GDef(name, pat, <map(\Var(x) -> DVar(x)\)> args', body)
     with
     	args' := <?[_|<id>]> args
-        // pat-vars := <map(\DVar(x) -> Var(x)\)> <collect-all(?DVar(_))> pat;
-        // args' := <filter(not(!(<id>, pat-vars); elem))> args;
-        // <debug(!"Gdef vars")> (args', <map(\Var(x) -> DVar(x)\)> args, pat-vars)
+
 
     gen': t* -> t'
     with
