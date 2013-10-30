@@ -12,6 +12,6 @@ plus1(x) = S(x)
 
 infiniteListOf(x) = Cons(x, infiniteListOf(x))
 
-main = head(tail(zeros()))
+main = tail(Cons(x, Cons(Z(), Nil())))
 //ignoreFirst(zeros(), plus1(Z()))
 //head(tail(infiniteListOf(plus1(Z()))))

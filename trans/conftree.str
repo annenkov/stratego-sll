@@ -14,7 +14,7 @@ signature
     constructors
         Transient   : Expr -> Step
         Fold        : Expr * [String] -> Step
-        Stop        : Step
+        Stop        : Expr -> Step
         Variants    : [Pattern] * [Expr] -> Step
         Decompose   : [Expr] -> Step
 
@@ -33,13 +33,13 @@ rules
             trace := []
             )
 
-
-
     conf-tree(r|prog) = !(<id>, []); ana-tree(drive(r|prog))
 
-    drive(r|prog): (t@Ctor(_,_), acc) -> Left(t)
+    drive(r|prog): (t@Ctor(_,_), acc) -> Stop(t)
     where
         <is-complete> t
+
+    drive(r|prog): (t@Var(_), acc) -> Stop(t)
 
     drive(r|prog): (t@Ctor(_, args*@[_|_]), acc) -> Decompose((t, <map(!(<id>, [t|acc]))> args*))
     where
@@ -49,14 +49,10 @@ rules
     drive(r|prog): (t@FCall(_, _), acc) -> Transient((t, (new-t, [t|acc])))
      where
         new-t := <r> t;
-        <debug(!"Transient: ")> t;
+        <debug(!"Transient: ")> (<pp-sll-string> t, <pp-sll-string> new-t);
      rules (
      	trace := [t|<trace>]
      )
-     // rules (
-     //    trace:+ t -> t
-     // )
-
 
     drive(r|prog): (t@FCall(_, _), acc) -> Variants(pats*, (t, <map(!(<r>, [t|acc]))> funcalls*))
     where
@@ -75,13 +71,13 @@ rules
     foldable(|acc): t -> (t', renamings)
     where
         <debug(!"Acc: ")> <map(pp-sll-string)> <reverse> <trace>;
-        // using strait or reverse <trace> for serching foldable nodes gives different configuration trees
-        t' := <getfirst(eq-mod-renaming(|t))> <reverse> <trace>;
+        // using direct or reverse order of serching foldable nodes gives different configuration trees
+        t' := <reverse; getfirst(eq-mod-renaming(|t))> <trace>;
         renamings := <zip> (<collect-all(?Var(<id>))> t', <collect-all(?Var(_))> t)
 
     ana-tree(unspool) =
         switch unspool
-            case ?Left(t): !Leaf(t)
+            case ?Stop(t): !Leaf(t)
             case ?Fold(t, renamings): !Leaf(Fold(t, renamings))
             case ?Decompose((t, y)): !Node(t, Decompose(<map(ana-tree(unspool))> y))
             case ?Variants(pats*, (t, y)): !Node(t, Variants(pats*, <map(ana-tree(unspool))> y))

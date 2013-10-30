@@ -27,11 +27,10 @@ rules
         mapping:+ t1 -> call1
         )
 
-    gen: Node(Ctor(name, [arg]), Decompose([t])) -> (call2, defs*)
+    gen: Node(Ctor(name, args*), Decompose(t*)) -> (Ctor(name, calls*), defs*)
     with
-        <debug(!"Gen decompose")> t;
-       (arg1, defs*) := <gen> t;
-        call2 := Ctor(name, [arg1])
+        <debug(!"Gen decompose")> t*;
+       (calls*, defs*) := <gen'> t*
 
     gen: Node(t1, Variants(pats*, t*)) -> (call1, <conc> (defs*, gdefs*))
     with
