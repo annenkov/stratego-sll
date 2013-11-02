@@ -6,20 +6,21 @@ imports
     include/SLL
     interpreter
     conftree
+    utils
 
 rules
 
     transform-program(|prog) = build-conf-tree(|prog); generate-program
     deforest-program(|prog) = build-conf-tree(|prog); simplify; generate-program
 
-    generate-program: tree -> Program("prog", <conc> (defs*, [MainDef(Expr(call))]))
+    generate-program: tree -> Program("example", <conc> (defs*, [MainDef(Expr(call))]))
     with
         (call, defs*) := <gen> tree
 
     gen: Node(t1, Transient(t2)) -> (call1, [FDef(name, <map(\Var(x) -> DVar(x)\)> args, call2)|defs*])
     with
         args := <collect-vars> t1;
-        name := <new>;
+        name := <gen-name(|"f")>;
         call1 := FCall(name, args);
         <debug(!"Gen transient")> (<pp-sll-string> call1, <pp-sll-string> t1);
         (call2, defs*) := <gen> t2;
@@ -35,7 +36,7 @@ rules
     gen: Node(t1, Variants(pats*, t*)) -> (call1, <conc> (defs*, gdefs*))
     with
         args := <collect-vars> t1;
-        name := <new>;
+        name := <gen-name(|"g")>;
         call1 := FCall(name, args);
 	    rules (
 	        mapping:+ t1 -> call1
@@ -63,11 +64,5 @@ rules
     	t' := <foldl(gen-helper)> (<map(gen)> t*, ([],[]))
 
     gen-helper: ((t1,t2), (e1, e2)) -> (<conc> (e1, [t1]), <conc> (e2, t2))
-
-    test-gen: t -> <pp-sll-string> new-prog
-    with
-        <collect-one(?MainDef(Expr(e)))> t;
-        conf-tree := <build-conf-tree(|t)> e;
-        new-prog := <generate-program> conf-tree
 
     collect-vars = collect-all(?Var(_), conc)

@@ -2,7 +2,20 @@ module testhelpers
 
 imports
     include/SLL
+    conftree
+    gen
 
 rules
 
     get-defs(pat): Program(_, defs*) -> <filter(pat)> defs*
+
+    test-eq: t -> <get-defs(?FDef("g", _, <id>) <+ ?FDef("f", _, <id>)); ?[t1, t2]; <eq-mod-renaming(|t1)> t2> t
+    test-not-eq: t -> <not(test-eq)> t
+
+    test-transform: t -> <transform-program(|t)> e
+    with
+        <collect-one(?MainDef(Expr(e)))> t
+
+    test-deforest: t -> <deforest-program(|t)> e
+    with
+        <collect-one(?MainDef(Expr(e)))> t

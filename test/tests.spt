@@ -48,17 +48,38 @@ test Not equal modulo renaming [[
         g(y) = add(S(y), Z())
 ]] run test-not-eq
 
-test Generation 1[[
+test Generate transients[[
     plusOne(x) = S(x)
 
     main = plusOne(plusOne(x))
 
-]] run test-gen to []
+]] run test-transform to
+	[[
+	   f1(x)=S(f2(x))
+	   f2(x)=S(x)
+	   main = f1(x)
+	]]
 
-test Generation 2[[
+
+test Generate variants[[
     add(Z(), y) = y
     add(S(x), y) = S(add(x,y))
 
     main = add(x, Z())
 
-]] run test-gen to []
+]] run test-transform to
+    [[
+       g1(Z())=Z()
+       g1(S(v1))=S(g1(v1))
+      main = g1(x)
+    ]]
+
+test Deforest [[
+    plusOne(x) = S(x)
+
+    main = plusOne(plusOne(x))
+
+]] run test-deforest to
+    [[
+       main = S(S(x))
+    ]]

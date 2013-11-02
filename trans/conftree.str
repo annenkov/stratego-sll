@@ -6,7 +6,7 @@ imports
     lib/editor-common.generated
     include/SLL
     interpreter
-    testhelpers
+    utils
 
 signature
     sorts
@@ -29,9 +29,7 @@ rules
 
     build-conf-tree(|prog): t -> <conf-tree(rewrite-step-alt(|prog)|prog)>
     with
-        rules(
-            trace := []
-            )
+        init-trace
 
     conf-tree(r|prog) = !(<id>, []); ana-tree(drive(r|prog))
 
@@ -50,18 +48,14 @@ rules
      where
         new-t := <r> t;
         <debug(!"Transient: ")> (<pp-sll-string> t, <pp-sll-string> new-t);
-     rules (
-     	trace := [t|<trace>]
-     )
+     update-trace(|t)
 
     drive(r|prog): (t@FCall(_, _), acc) -> Variants(pats*, (t, <map(!(<r>, [t|acc]))> funcalls*))
     where
         (pats*, funcalls*) := <variants-r(|prog)> t;
         <debug(!"Variants: ")> funcalls*;
         <not(foldable(|acc))> t;
-        rules (
-          trace := [t|<trace>]
-        )
+        update-trace(|t)
 
     drive(r|prog): (t@FCall(_, _), acc) -> Fold(folded-to, renamings)
     where
@@ -109,26 +103,30 @@ rules
 
     pat-with-new-vars: Pat(n, a*) -> Pat(n, new-vars*)
     with
-        new-vars* := <topdown(try(\DVar(_) -> DVar(<new>)\))> a*
-
+        new-vars* := <topdown(try(\DVar(_) -> DVar(<gen-name(|"v")>)\))> a*
 
     pat2ctor: Pat(name, args*) -> Ctor(name, <topdown(try(\DVar(x) -> Var(x)\))> args*)
 
     eq-mod-renaming(|t1): t2 -> t2
     where
-        <debug(!"Comparing")> (<pp-sll-string> t1, <pp-sll-string> t2);
     	<equal> (<erase-names> t1, <erase-names> t2)
 
     erase-names = topdown(try(?Var(_); !Var("_")))
 
+    // tracing all nodes to fold tree later
+    init-trace: _ -> None()
+    with
+        rules ( trace := [] )
+
+    update-trace(|t): _ -> None()
+    with
+        rules ( trace := [t|<trace>] )
+
+    // simplification rules used to deforest programm
     simplify = bottomup(try(\ Node(t, Transient(n)) -> n \))
     remove-transient: Node(t, Transient(n)) -> n
     where
         <not(is-base(|t))> n
-
     is-base(|t): t -> <collect-one(?Fold(t, _))> t
     where
         <debug(!"Is base: ")> t
-
-    test-eq: t -> <get-defs(?FDef("g", _, <id>) <+ ?FDef("f", _, <id>)); ?[t1, t2]; <eq-mod-renaming(|t1)> t2> t
-    test-not-eq: t -> <not(test-eq)> t

@@ -15,26 +15,26 @@ imports
 rules
 
   // Getting definition by explicit traversals
-  get-f-func-body(|prog):
+  get-f-def(|prog):
     FCall(name, args*) -> (body, <build-env> (vars*, args*))
     where
       <collect-one(?FDef(name, vars*, body))> prog
 
-  get-g-func-body(|prog):
+  get-g-def(|prog):
     FCall(name,[Ctor(ctor-name, ctor-args*)|args* ]) ->
         (body, <conc> (<build-env>(ctor-vars*, ctor-args*), <build-env>(vars*, args*)))
     where
         <collect-one(?GDef(name, Pat(ctor-name, ctor-vars*), vars*, body))> prog
 
 
-  get-func-body(|prog) = get-g-func-body(|prog) <+ get-f-func-body(|prog)
+  get-func-def(|prog) = get-g-def(|prog) <+ get-f-def(|prog)
 
   // Unfolding and substitution
   rewrite-func(|prog):
     func@FCall(name, args*) -> f
     where
       <debug(!"Function: ")> func;
-      (body, env) := <get-func-body(|prog)> func;
+      (body, env) := <get-func-def(|prog)> func;
       <debug(!"Resolved body: ")> body;
       <debug(!"Env: ")> env;
       f := <substitute(|env)> body
@@ -59,12 +59,10 @@ rules
 
   substitute(|env) : Ctor(n, args*) -> t
     with
-      <debug(!"Recursing on Ctor: ")> args*;
       t := Ctor(n, <map(substitute(|env))> args*)
 
   substitute(|env) : FCall(n, args*) -> t
     with
-      <debug(!"Recursing on FCall: ")> args*;
       t := FCall(n, <map(substitute(|env))> args*)
 
   substitute(|env) : Var(a) -> arg
@@ -73,9 +71,7 @@ rules
         <debug(!$[Substitite: [a]--->])> arg
 
   substitute(|env) : e@Var(a) -> e
-      where <not(lookup)> (a, env);
-      <debug(!"Not changing: ")> a;
-      <debug(!"Env: ")> env
+      where <not(lookup)> (a, env)
 
   // Idiomatic (for strategic term rewriting) version of eval
   eval(r) = rec e(try(r; e); Ctor(id, map(e)))
