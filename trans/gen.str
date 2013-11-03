@@ -54,9 +54,13 @@ rules
     gen: Leaf(t) -> (t, [])
 
     make-gdef(|name, args): (pat, body) -> GDef(name, pat, <map(\Var(x) -> DVar(x)\)> args', body)
-    with
-    	args' := <?[_|<id>]> args
+    where
+    	args' := <?[_|<id>]> args;
+    	<?[_|_]> args'
 
+    make-gdef(|name, args): (pat, body) -> GDef(name, pat, body)
+    where
+        <?[_|_]> args
 
     gen': t* -> t'
     with

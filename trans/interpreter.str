@@ -24,8 +24,13 @@ rules
     FCall(name,[Ctor(ctor-name, ctor-args*)|args* ]) ->
         (body, <conc> (<build-env>(ctor-vars*, ctor-args*), <build-env>(vars*, args*)))
     where
+        <?[_|_]> args*;
         <collect-one(?GDef(name, Pat(ctor-name, ctor-vars*), vars*, body))> prog
 
+   get-g-def(|prog):
+    FCall(name,[c@Ctor(ctor-name, ctor-args*)]) -> (body, <build-env>(ctor-vars*, ctor-args*))
+    where
+        <collect-one(?GDef(name, Pat(ctor-name, ctor-vars*), body))> prog
 
   get-func-def(|prog) = get-g-def(|prog) <+ get-f-def(|prog)
 

@@ -1,4 +1,4 @@
 package SLL;
 
-public class SLLParseController extends SLLParseControllerGenerated 
-{ }
+public class SLLParseController extends SLLParseControllerGenerated {
+}

@@ -9,7 +9,6 @@ plusOne(x) = S(x)
 add(Z(), y) = y
 add(S(x), y) = S(add(x,y))
 
-
 even(Z()) = True()
 even(S(x)) = odd(x)
 odd(Z()) = False()

@@ -31,40 +31,39 @@ rules
     with
         init-trace
 
-    conf-tree(r|prog) = !(<id>, []); ana-tree(drive(r|prog))
+    conf-tree(r|prog) = ana-tree(drive(r|prog))
 
-    drive(r|prog): (t@Ctor(_,_), acc) -> Stop(t)
+    drive(r|prog): t@Ctor(_,_) -> Stop(t)
     where
         <is-complete> t
 
-    drive(r|prog): (t@Var(_), acc) -> Stop(t)
+    drive(r|prog): t@Var(_) -> Stop(t)
 
-    drive(r|prog): (t@Ctor(_, args*@[_|_]), acc) -> Decompose((t, <map(!(<id>, [t|acc]))> args*))
+    drive(r|prog): t@Ctor(_, args*@[_|_]) -> Decompose((t, args*))
     where
         <not(is-complete)> t;
         <debug(!"Decompose: ")> t
 
-    drive(r|prog): (t@FCall(_, _), acc) -> Transient((t, (new-t, [t|acc])))
+    drive(r|prog): t@FCall(_, _) -> Transient((t, new-t))
      where
         new-t := <r> t;
         <debug(!"Transient: ")> (<pp-sll-string> t, <pp-sll-string> new-t);
      update-trace(|t)
 
-    drive(r|prog): (t@FCall(_, _), acc) -> Variants(pats*, (t, <map(!(<r>, [t|acc]))> funcalls*))
+    drive(r|prog): t@FCall(_, _) -> Variants(pats*, (t, <map(r)> funcalls*))
     where
         (pats*, funcalls*) := <variants-r(|prog)> t;
         <debug(!"Variants: ")> funcalls*;
-        <not(foldable(|acc))> t;
+        <not(foldable)> t;
         update-trace(|t)
 
-    drive(r|prog): (t@FCall(_, _), acc) -> Fold(folded-to, renamings)
+    drive(r|prog): t@FCall(_, _) -> Fold(folded-to, renamings)
     where
-        (folded-to, renamings) := <foldable(|acc)> t;
+        (folded-to, renamings) := <foldable> t;
         <debug(!"Foldable: ")> (t, folded-to)
 
-    foldable(|acc): t -> (t', renamings)
+    foldable: t -> (t', renamings)
     where
-        <debug(!"Acc: ")> <map(pp-sll-string)> <reverse> <trace>;
         // using direct or reverse order of serching foldable nodes gives different configuration trees
         t' := <reverse; getfirst(eq-mod-renaming(|t))> <trace>;
         renamings := <zip> (<collect-all(?Var(<id>))> t', <collect-all(?Var(_))> t)
@@ -84,11 +83,12 @@ rules
 
     variants(|prog): fcall@FCall(f-name, [Var(_)|_]) -> (pats*, fcalls*)
     where
-        g-defs* := <collect-all(?GDef(f-name, _, _, _)); ?[_|_]> prog;
+        g-defs* := <collect-all(?GDef(f-name, _,_,_) <+ ?GDef(f-name, _,_)); ?[_|_]> prog;
         res := <map(variants-step(|fcall))> g-defs*;
         pats* := <map(?(<id>, _))> res;
         fcalls* := <map(?(_, <id>))> res
 
+    variants-step(|f-call): GDef(name, pat, body) -> <variants-step(|f-call)> GDef(name, pat, [], body)
     variants-step(|f-call): GDef(name, pat, args*, body) -> (new-pat, res)
     where
         <?FCall(f-name, [Var(var-name)|vars*])> f-call;
@@ -113,7 +113,7 @@ rules
 
     erase-names = topdown(try(?Var(_); !Var("_")))
 
-    // tracing all nodes to fold tree later
+    // using dynamic rules to trace all nodes to fold tree later
     init-trace: _ -> None()
     with
         rules ( trace := [] )
@@ -122,7 +122,7 @@ rules
     with
         rules ( trace := [t|<trace>] )
 
-    // simplification rules used to deforest programm
+    // simplification rules used to deforest program
     simplify = bottomup(try(\ Node(t, Transient(n)) -> n \))
     remove-transient: Node(t, Transient(n)) -> n
     where

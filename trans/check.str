@@ -4,23 +4,37 @@ imports
   libstratego-lib
   include/SLL
   lib/editor-common.generated
+  utils
 
 rules
 
   // Analysis: does a topdown traversal of the tree,
-  // and tries to apply the record-entity rule.
+  // and tries to apply the record-func rule.
   analyze:
     t -> t
     with
-      <topdown(try(record-entity))> t
+      <topdown(try(record-func))> t
 
-  // Records the definition of an entity in a dynamic rule GetEntity.
-  record-entity:
-    Entity(x, body) -> Entity(x, body)
+  // Records the definition of a function in a dynamic rule GetFunc.
+  record-func:
+    FDef(name, vars*, body) -> FDef(name, vars*, body)
     with
-      // For a name 'x', GetEntity will return the original 'x' tree node
       rules(
-        GetEntity :+ x -> x
+        GetFunc :+ name -> name
+      )
+
+   record-func:
+    GDef(name, pat, body) -> GDef(name, pat, body)
+    with
+      rules(
+        GetFunc :+ name -> name
+      )
+
+    record-func:
+    GDef(name, pat, vars*, body) -> GDef(name, pat, vars*, body)
+    with
+      rules(
+        GetFunc :+ name -> name
       )
 rules
 
@@ -31,7 +45,7 @@ rules
     where
       not(!type => "String"); // String and Int are built-in types
       not(!type => "Int");
-      not(<GetEntity> type) // no entity for this type
+      not(<GetFunc> type) // no entity for this type
 
   // Reports an error if an entity is defined more than once.
   // This constraint is implemented by testing if the "bag" of
@@ -39,7 +53,28 @@ rules
   constraint-error:
     Entity(x, _) -> (x, $[Duplicate entity name])
     where
-      not(<bagof-GetEntity> x => [_])
+      not(<bagof-GetFunc> x => [_])
+
+  constraint-error:
+    FCall(x, _) -> (x, $[Function not defined: [x]])
+    where
+      <bagof-GetFunc> x => []
+
+  constraint-error:
+    FDef(x, vars*, body) -> (x, $[Variables not defined: [<string-join(|",")> not-in-def]])
+    where
+        vars-in-body* := <map(?Var(<id>))> <collect-all(?Var(_))> body;
+        not-in-def := <diff> (<make-set> vars-in-body*, <make-set> <map(?DVar(<id>))> vars*);
+        not(<?[]> not-in-def)
+
+  constraint-error:
+    GDef(x, Pat(p-name, p-vars*), vars*, body) -> (x, $[Variable not defined: [<string-join(|",")> not-in-def]])
+    where
+        vars-in-body* := <map(?Var(<id>))> <collect-all(?Var(_))> body;
+        not-in-def := <diff> (<make-set> vars-in-body*, <make-set> <map(?DVar(<id>))> (<conc> (p-vars*, vars*)));
+        not(<?[]> not-in-def)
+
+  constraint-error: GDef(x, pat, body) -> <constraint-error> GDef(x, pat, [], body)
 
   constraint-warning:
     Entity(x, _) -> (x, $[Entity names must start with a capital])
@@ -47,5 +82,4 @@ rules
       not(<string-starts-with-capital> x)
 
   constraint-note:
-    Module(x @ "example", _) -> (x, $[This is just an example program in the "entities" language
-                                      (this note is defined in trans/check.str) ])
+    Module(x @ "example", _) -> (x, $[Note])

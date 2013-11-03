@@ -15,9 +15,8 @@ exports
     "main" "=" Main                                   -> Definition {cons("MainDef")}
     Expr                                              -> Main {cons("Expr")}
     FUNCNAME "(" {Var ","}* ")" "=" Expr              -> Definition {cons("FDef")}
-    FUNCNAME "(" Pattern GDefVars ")" "=" Expr        -> Definition {cons("GDef")}
-    {Var ","}*                                        -> GDefVars
-    "," {Var ","}+                                    -> GDefVars
+    FUNCNAME "(" Pattern ")" "=" Expr     -> Definition {cons("GDef")}
+    FUNCNAME "(" Pattern "," {Var ","}* ")" "=" Expr     -> Definition {cons("GDef")}
     CTOR"(" {Var ","}* ")"                            -> Pattern {cons("Pat")}
     ID                                                -> Var {cons("DVar")}
     FUNCNAME"(" {Expr ","}* ")"                       -> Expr {cons("FCall")}
