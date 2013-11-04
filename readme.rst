@@ -5,6 +5,7 @@ Simple Lazy Language: interpreter and minimal supercompiler
 What is it
 ----------
 This project has several goals.
+
 * use strategic term rewriting as DSL for program transformation to build interpreter and supercompiler (explore pros and cons);
 * reuse interpreter (or it's parts) to write configuration tree builder;
 * build environment to experiment with supercompiler.
@@ -21,6 +22,7 @@ Spoofax works on Eclipse platform and allows one to create full-featured IDE plu
 .. image:: /ib_soft/stratego-sll/raw/default/media/sll-editor.png
 
 You can run, trace, apply transformations to source program and immediately get the result.
+
 .. image:: /ib_soft/stratego-sll/raw/default/media/sll-editor-run.png
 .. image:: /ib_soft/stratego-sll/raw/default/media/sll-editor-deforest.png
 
@@ -28,6 +30,6 @@ As a result of transformation (deforestation, for example) you get another progr
 
 References
 ----------
-[1] Ilya Klyuchnikov. The ideas and methods of supercompilation. _Practice of Functional Programming: http://fprog.ru/2011/issue7/, 7, 2011. In Russian.
-[2] Sørensen M. H.— Turchin’s Supercompiler Revisited: an Operational The-ory of Positive Information Propagation. — Master’s thesis, Københavns Universitet, Datalogisk Institut, 1994.
-[3] http://strategoxt.org/Spoofax
+.. [1] Ilya Klyuchnikov. The ideas and methods of supercompilation. _Practice of Functional Programming: http://fprog.ru/2011/issue7/, 7, 2011. In Russian.
+.. [2] Sørensen M. H.— Turchin’s Supercompiler Revisited: an Operational The-ory of Positive Information Propagation. — Master’s thesis, Københavns Universitet, Datalogisk Institut, 1994.
+.. [3] http://strategoxt.org/Spoofax
