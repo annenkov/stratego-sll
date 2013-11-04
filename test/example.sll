@@ -14,8 +14,4 @@ even(S(x)) = odd(x)
 odd(Z()) = False()
 odd(S(x)) = even(x)
 
-test(Z()) = Z()
-test(S(x)) = x
-
-main = add(x, Z())
-  //even(S(S(Z())))
+main = odd(add(S(Z()), S(Z())))
