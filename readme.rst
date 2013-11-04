@@ -12,7 +12,7 @@ This project has several goals.
 
 Simple Lazy Language (SLL)
 --------------------------
-This project is inspired by minimal supercompiler written in Haskell [1]_. Language considered in the project is "Simple Lazy Language" - a first-order functional language that corresponds to M\ :sub: `0` \ language from [2]_.
+This project is inspired by minimal supercompiler written in Haskell [1]_. Language considered in the project is "Simple Lazy Language" - a first-order functional language that corresponds to M\ :sub:`0` \ language from [2]_.
 
 Spoofax and Startego
 --------------------
