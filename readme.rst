@@ -26,10 +26,52 @@ You can run, trace, apply transformations to source program and immediately get 
 .. image:: /ib_soft/stratego-sll/raw/default/media/sll-editor-run.png
 .. image:: /ib_soft/stratego-sll/raw/default/media/sll-editor-deforest.png
 
-As a result of transformation (deforestation, for example) you get another program that can be runned from the same "Transformation" menu.
+As a result of transformation (deforestation, for example) you get another program that can be ran from the same "Transformation" menu.
+
+Already done
+------------
+* interpreter
+* tracer(as list of interpreter steps)
+* configuration tree building/folding (no generalization yet)
+* program generation
+* deforestation
+
+To be done
+----------
+* generalization
+* positive information propagation
+
+Stratego pros and cons
+----------------------
+Pros
+~~~~
+It's convenient to build rewriting interpeters. See, for example [4]_.
+Configuration tree manipulations also very convenient with generic rewriting strategies.
+
+   For example, simplification used to deforest program::
+
+      simplify = bottomup(try(\ Node(t, Transient(n)) -> n \))
+
+      remove-transient: Node(t, Transient(n)) -> n
+        where <not(is-base(|t))> n
+
+      is-base(|t) = collect-one(?Fold(t, _))
+
+Great support from Spoofax and Eclipse environment.
+
+Cons
+~~~~
+
+Dynamic typing. This is significant for writing big programs.
+But here we have some interesting alternatives:
+* _Kiama (Scala library): http://code.google.com/p/kiama/
+* _KURE (Haskell library): http://hackage.haskell.org/package/kure
+
+Poor documented some features - dynamic rules, Name Binding Analysis (NaBL).
 
 References
 ----------
 .. [1] Ilya Klyuchnikov. The ideas and methods of supercompilation. _Practice of Functional Programming: http://fprog.ru/2011/issue7/, 7, 2011. In Russian.
-.. [2] Sørensen M. H.— Turchin’s Supercompiler Revisited: an Operational The-ory of Positive Information Propagation. — Master’s thesis, Københavns Universitet, Datalogisk Institut, 1994.
+.. [2] Sørensen M. H.— Turchin’s Supercompiler Revisited: an Operational Theory of Positive Information Propagation. — Master’s thesis, Københavns Universitet, Datalogisk Institut, 1994.
 .. [3] http://strategoxt.org/Spoofax
+.. [4] Eelco Dolstra, Eelco Visser. _Building Interpreters with Rewriting Strategies: http://www.sciencedirect.com/science/article/pii/S1571066104804274

@@ -127,6 +127,4 @@ rules
     remove-transient: Node(t, Transient(n)) -> n
     where
         <not(is-base(|t))> n
-    is-base(|t): t -> <collect-one(?Fold(t, _))> t
-    where
-        <debug(!"Is base: ")> t
+    is-base(|t) = collect-one(?Fold(t, _))
