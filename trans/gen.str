@@ -9,9 +9,21 @@ imports
     utils
 
 rules
-
-    transform-program(|prog) = build-conf-tree(|prog); generate-program
-    deforest-program(|prog) = build-conf-tree(|prog); simplify; generate-program
+    /**
+     Program transformation without any simplications
+     r - rewrite step of the interpreter
+     p - program
+     Apply this strategy to task given in "main" expression of the program   
+    */
+    transform-program(r|p) = build-conf-tree(r|p); generate-program
+    
+     /**
+     Removing transient nodes in configuration tree and generating program.
+     r - rewrite step of the interpreter
+     p - program
+     Apply this strategy to task given in "main" expression of the program   
+    */
+    deforest-program(r|p) = build-conf-tree(r|p); simplify; generate-program
 
     generate-program: tree -> Program("example", <conc> (defs*, [MainDef(Expr(call))]))
     with
@@ -51,7 +63,7 @@ rules
         <debug> <all-keys-mapping>;
         t1 := <mapping> t
 
-    gen: Leaf(t) -> (t, [])
+    gen: Leaf(Stop(t)) -> (t, [])
 
     make-gdef(|name, args): (pat, body) -> GDef(name, pat, <map(\Var(x) -> DVar(x)\)> args', body)
     where
