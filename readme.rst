@@ -40,12 +40,13 @@ To be done
 ----------
 * generalization
 * positive information propagation
+* explicit parameterization of configuration tree builder by folding strategy
 
 Stratego pros and cons
 ----------------------
 Pros
 ~~~~
-It's convenient to build rewriting interpeters. See, for example [4]_.
+It's convenient to build rewriting interpreters. See, for example [4]_.
 Configuration tree manipulations also very convenient with generic rewriting strategies.
 
    For example, simplification used to deforest program::
@@ -64,10 +65,11 @@ Cons
 
 Dynamic typing. This is significant for writing big programs.
 But here we have some interesting alternatives:
-* _Kiama (Scala library): http://code.google.com/p/kiama/
-* _KURE (Haskell library): http://hackage.haskell.org/package/kure
 
-Poor documented some features - dynamic rules, Name Binding Analysis (NaBL).
+.. _Kiama (Scala library): http://code.google.com/p/kiama/
+.. _KURE (Haskell library): http://hackage.haskell.org/package/kure
+
+Poorly documented some features - dynamic rules, Name Binding Analysis (NaBL).
 
 References
 ----------
