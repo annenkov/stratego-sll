@@ -18,8 +18,8 @@ signature
         Variants    : [Pattern] * [Expr] -> Step
         Decompose   : [Expr] -> Step
 
-        Node        : Expr * [Expr] -> Tree
-        Leaf        : Expr -> Tree
+        Node        : Expr * Step -> Tree
+        Leaf        : Step -> Tree
 
         Left        : Expr -> Either
         Right       : Expr -> Either
@@ -121,7 +121,7 @@ rules
         rules ( trace := [t|<trace>] )
 
     // simplification rules used to deforest program
-    simplify = bottomup(try(\ Node(t, Transient(n)) -> n \))
+    simplify = bottomup(try(remove-transient))
     remove-transient: Node(t, Transient(n)) -> n
     where
         <not(is-base(|t))> n

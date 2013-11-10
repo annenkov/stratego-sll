@@ -51,7 +51,7 @@ Configuration tree manipulations also very convenient with generic rewriting str
 
    For example, simplification used to deforest program::
 
-      simplify = bottomup(try(\ Node(t, Transient(n)) -> n \))
+      simplify = bottomup(try(remove-transient))
 
       remove-transient: Node(t, Transient(n)) -> n
         where <not(is-base(|t))> n
@@ -66,8 +66,8 @@ Cons
 Dynamic typing. This is significant for writing big programs.
 But here we have some interesting alternatives:
 
-.. _Kiama (Scala library): http://code.google.com/p/kiama/
-.. _KURE (Haskell library): http://hackage.haskell.org/package/kure
+* `Kiama (Scala library) <http://code.google.com/p/kiama/>`_
+* `KURE (Haskell library) <http://hackage.haskell.org/package/kure>`_
 
 Poorly documented some features - dynamic rules, Name Binding Analysis (NaBL).
 
