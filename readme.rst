@@ -73,7 +73,7 @@ Poorly documented some features - dynamic rules, Name Binding Analysis (NaBL).
 
 References
 ----------
-.. [1] Ilya Klyuchnikov. The ideas and methods of supercompilation. _Practice of Functional Programming: http://fprog.ru/2011/issue7/, 7, 2011. In Russian.
+.. [1] Ilya Klyuchnikov. The ideas and methods of supercompilation. `Practice of Functional Programming <http://fprog.ru/2011/issue7/>`_, 7, 2011. In Russian.
 .. [2] Sørensen M. H.— Turchin’s Supercompiler Revisited: an Operational Theory of Positive Information Propagation. — Master’s thesis, Københavns Universitet, Datalogisk Institut, 1994.
 .. [3] http://strategoxt.org/Spoofax
-.. [4] Eelco Dolstra, Eelco Visser. _Building Interpreters with Rewriting Strategies: http://www.sciencedirect.com/science/article/pii/S1571066104804274
+.. [4] Eelco Dolstra, Eelco Visser. `Building Interpreters with Rewriting Strategies <http://www.sciencedirect.com/science/article/pii/S1571066104804274>`_
