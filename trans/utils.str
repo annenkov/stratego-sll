@@ -1,0 +1,17 @@
+module utils
+imports
+    include/SLL
+
+rules
+    gen-name(|prefix): _ -> $[[prefix][c]]
+    where
+        c := <add>(<counter> prefix, 1);
+        (rules (counter: prefix -> c))
+
+    gen-name(|prefix): _ -> $[[prefix]1]
+    where
+        not(<counter> prefix);
+        (rules (counter: prefix -> 1))
+
+    string-join(|c) = <foldl(\(x,y) -> <concat-strings> [y, c, x]\)> (<Tl>, <Hd>)
+    string-join(|c) : [] -> ""
