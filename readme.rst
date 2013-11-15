@@ -10,6 +10,15 @@ This project has several goals.
 * reuse interpreter (or it's parts) to write configuration tree builder;
 * build environment to experiment with supercompiler.
 
+Running the project
+-------------------
+1. You need Eclipse. Tested for Eclipse 3.5.0 (Helios) and 4.2.0 (Juno)
+2. Install Spoofax 1.1 (use "Help/Install New Software...", update site URL: http://download.spoofax.org/update/stable/). Also, read `instructions <http://metaborg.org/wiki/spoofax/download>`_
+3. Clone this project and add to workspace.
+4. Build project (from menu "Project/Build Project" or right-click on build.main.xml and choose "Run as/Ant Build")
+5. Now you can run examples from "test" folder.
+
+
 Simple Lazy Language (SLL)
 --------------------------
 This project is inspired by minimal supercompiler written in Haskell [1]_. Language considered in the project is "Simple Lazy Language" - a first-order functional language that corresponds to M\ :sub:`0` \ language from [2]_.
