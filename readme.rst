@@ -29,12 +29,12 @@ Spoofax and Startego
 Spoofax Language Workbench [3]_ used as primary tool for writing interpreter and supercompiler. Spoofax is based on Stratego, which is a transformation language with programmable rewriting strategies and Syntax Definition Formalism, as language for grammar definition.
 Spoofax works on Eclipse platform and allows one to create full-featured IDE plugin with syntax highlighting, perform semantic analysis and context completion.
 
-.. image:: /ib_soft/stratego-sll/raw/default/media/sll-editor.png
+.. image:: https://github.com/annenkov/stratego-sll/raw/master/media/sll-editor.png
 
 You can run, trace, apply transformations to source program and immediately get the result.
 
-.. image:: /ib_soft/stratego-sll/raw/default/media/sll-editor-run.png
-.. image:: /ib_soft/stratego-sll/raw/default/media/sll-editor-deforest.png
+.. image:: https://github.com/annenkov/stratego-sll/raw/master/media/sll-editor-run.png
+.. image:: https://github.com/annenkov/stratego-sll/raw/master/media/sll-editor-deforest.png
 
 As a result of transformation (deforestation, for example) you get another program that can be ran from the same "Transformation" menu.
 
