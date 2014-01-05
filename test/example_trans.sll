@@ -1,0 +1,19 @@
+/**
+* Example SLL program for transformation
+*/
+program example
+
+add(Z(), y) = y
+add(S(x), y) = S(add(x,y))
+
+mult(Z(), y) = Z()
+mult(S(x), y) = add(y, mult(x,y))
+
+sqr(x) = mult(x,x)
+
+even(Z()) = True()
+even(S(x)) = odd(x)
+odd(Z()) = False()
+odd(S(x)) = even(x)
+
+main = even(sqr(x))
