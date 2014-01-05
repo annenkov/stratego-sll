@@ -1,0 +1,33 @@
+module dot
+
+imports
+    lib/editor-common.generated
+    include/SLL
+    interpreter
+    conftree
+    gen
+
+rules
+	to-dot: Node(e1, Transient(Node(e2, _))) -> (e1, e2)
+	to-dot: Node(e1, Transient(Leaf(Stop(e2)))) -> (e1, e2)
+	to-dot: Node(e1, Transient(Leaf(Fold(e2, renamings)))) -> (e1, <substitute(|renamings)> e2)
+
+	to-dot: Node(e1, Variants(p*, e*)) -> res
+    with
+        res := <map(to-dot'(|e1))> e*
+
+    to-dot: Node(e1, Decompose(e*)) -> res
+    with
+        res := <map(to-dot'(|e1))> e*
+
+    to-dot'(|e1): Node(e2, _) -> (e1, e2)
+    to-dot'(|e1): Leaf(Stop(e2)) -> (e1, e2)
+
+	to-dot: Leaf(Fold(e, renamings)) -> (<substitute(|renamings)> e, e)
+
+	to-dot-s = collect-all(to-dot); flatten-list; pp-dot'
+
+	pp-dot': (e1, e2) -> $["[<pp-sll-string> e1]" -> "[<pp-sll-string> e2]";
+                           ]
+	pp-dot': e* -> $[[<map(pp-dot')> e*]]
+

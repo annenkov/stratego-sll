@@ -22,5 +22,6 @@ builders
   builder  : "Build simplified configuration tree" = deforest-tree  (openeditor) (realtime)
   builder  : "Transform" = transform  (openeditor) (realtime)
   builder  : "Deforest" = deforest  (openeditor) (realtime)
+  builder  : "To DOT" = generate-dot (openeditor) (realtime)
 
   //on save  : editor-save

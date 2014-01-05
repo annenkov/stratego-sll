@@ -15,6 +15,7 @@ imports
   refactor
   gen
   testhelpers
+  dot
 
 rules // Main editor interface (defined by editor/SLL-Builders and -References.esv)
 
@@ -58,7 +59,7 @@ rules // Main editor interface (defined by editor/SLL-Builders and -References.e
       conf-tree := <build-conf-tree(rewrite-step-alt(|ast)|ast); simplify> main-def
 
 
-  transform: (selected, position, ast, path, project-path) -> (filename, <pp-sll-string> prog)
+ transform: (selected, position, ast, path, project-path) -> (filename, <pp-sll-string> prog)
   with
       filename := <concat-strings> [<remove-extension> path, ".trans.sll"];
       <collect-one(?MainDef(Expr(main-def)))> selected;
@@ -95,3 +96,10 @@ rules // Main editor interface (defined by editor/SLL-Builders and -References.e
     (node, position, ast, path, project-path) ->  proposals
     where
         proposals := <all-keys-GetFunc>
+
+  // DOT file generation
+  generate-dot: (selected, position, ast, path, project-path) -> (filename, <to-dot-s> conf-tree)
+  with
+      filename := <guarantee-extension(|"dot")> path;
+      <collect-one(?MainDef(Expr(main-def)))> selected;
+      conf-tree := <build-conf-tree(rewrite-step-alt(|ast)|ast)> main-def
