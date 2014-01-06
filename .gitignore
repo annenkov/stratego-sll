@@ -12,4 +12,4 @@ lib-refactoring/*.generated.str
 media/Thubms.db
 test/*.trans.sll
 test/*_local.sll
-test/*_local.dot
+test/*.dot
