@@ -13,15 +13,15 @@ rules
      Program transformation without any simplications
      r - rewrite step of the interpreter
      p - program
-     Apply this strategy to task given in "main" expression of the program   
+     Apply this strategy to task given in "main" expression of the program
     */
     transform-program(r|p) = build-conf-tree(r|p); generate-program
-    
+
      /**
      Removing transient nodes in configuration tree and generating program.
      r - rewrite step of the interpreter
      p - program
-     Apply this strategy to task given in "main" expression of the program   
+     Apply this strategy to task given in "main" expression of the program
     */
     deforest-program(r|p) = build-conf-tree(r|p); simplify; generate-program
 

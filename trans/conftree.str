@@ -43,10 +43,13 @@ rules
         <debug(!"Decompose: ")> t
 
     drive(r|prog): t@FCall(_, _) -> (t, Transient(new-t))
-     where
+    where
+        debug(!"Pre transient: ");
+        <not(foldable)> t;
         new-t := <r> t;
         <debug(!"Transient: ")> (<pp-sll-string> t, <pp-sll-string> new-t);
-     update-trace(|t)
+        <debug> <pp-sll-string> new-t;
+        <if (?FCall(_,_)) then update-trace(|t) end> new-t
 
     drive(r|prog): t@FCall(_, _) -> (t, Variants(pats*, <map(r)> funcalls*))
     where
@@ -57,13 +60,14 @@ rules
 
     drive(r|prog): t@FCall(_, _) -> Fold(folded-to, renamings)
     where
+        <debug(!"Trying to fold: ")> t;
         (folded-to, renamings) := <foldable> t;
-        <debug(!"Foldable: ")> (t, folded-to)
+        <debug(!"Foldable: ")> (<pp-sll-string> t, <pp-sll-string> folded-to)
 
     foldable: t -> (t', renamings)
     where
         // using direct or reverse order of serching foldable nodes gives different configuration trees
-        t' := <reverse; getfirst(eq-mod-renaming(|t))> <trace>;
+        t' := <getfirst(eq-mod-renaming(|t))> <trace>;
         renamings := <zip> (<collect-all(?Var(<id>))> t', <collect-all(?Var(_))> t)
 
     ana-tree(unspool) =
@@ -118,7 +122,9 @@ rules
 
     update-trace(|t): _ -> None()
     with
-        rules ( trace := [t|<trace>] )
+        rules ( trace := <if ?FCall(_,_) then ![t|<trace>] else trace end> t );
+        //rules ( trace := [t|<trace>]);
+        <debug(!"Trace: ")> <map(pp-sll-string)> <trace>
 
     // simplification rules used to deforest program
     simplify = bottomup(try(remove-transient))
