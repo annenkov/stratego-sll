@@ -7,27 +7,45 @@ imports
     conftree
     gen
 
+signature
+    constructors
+        Label: String -> Annotation
+        Foldable: Annotation
+
 rules
 	to-dot: Node(e1, Transient(Node(e2, _))) -> (e1, e2)
 	to-dot: Node(e1, Transient(Leaf(Stop(e2)))) -> (e1, e2)
-	to-dot: Node(e1, Transient(Leaf(Fold(e2, renamings)))) -> (e1, <substitute(|renamings)> e2)
+	to-dot: Node(e1, Transient(Leaf(Fold(e2, renamings)))) -> (e1{Foldable()}, <substitute(|renamings)> e2)
+
+    to-dot: Leaf(Fold(e, renamings)) -> (<preserve-annotation(substitute(|renamings))> e{Foldable()}, e)
 
 	to-dot: Node(e1, Variants(p*, e*)) -> res
     with
-        res := <map(to-dot'(|e1))> e*
+        <debug> e1;
+        annos := <get-annotations> e1;
+        res := <map(annotate(|annos))> <zip> (<map(\t -> Label(<pp-sll-string> t) \)> p*, <map(to-dot'(|e1))> e*)
+
+    annotate(|annos): (anno, (e1, e2)) -> (<set-annotations> (e1, [anno|annos]), e2)
 
     to-dot: Node(e1, Decompose(e*)) -> res
     with
+        <debug> e1;
         res := <map(to-dot'(|e1))> e*
 
     to-dot'(|e1): Node(e2, _) -> (e1, e2)
     to-dot'(|e1): Leaf(Stop(e2)) -> (e1, e2)
-
-	to-dot: Leaf(Fold(e, renamings)) -> (<substitute(|renamings)> e, e)
+    to-dot'(|e1): Leaf(Fold(e2, renamings)) -> (e1, <substitute(|renamings)> e2)
 
 	to-dot-s = collect-all(to-dot); flatten-list; pp-dot'
 
-	pp-dot': (e1, e2) -> $["[<pp-sll-string> e1]" -> "[<pp-sll-string> e2]";
+	pp-dot': (e1, e2) -> $["[<pp-sll-string> e1]" -> "[<pp-sll-string> e2]" [attrs];
                            ]
+    where
+    	style := <if get-annotations; collect-one(?Foldable()) then !"style=\"dashed\"" else !"" end> e1;
+    	label := <if get-annotations; collect-one(?Label(pat)) then !$[label="[pat]"] else !"" end> e1;
+    	attrs := ${[{style} {label}]}
+
 	pp-dot': e* -> $[[<map(pp-dot')> e*]]
+	with
+	    <debug> e*
 
