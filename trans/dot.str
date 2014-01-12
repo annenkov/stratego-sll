@@ -11,13 +11,31 @@ signature
     constructors
         Label: String -> Annotation
         Foldable: Annotation
+        Unfoldable: Annotation
+        NodeLabel: String -> Annotation
 
 rules
+		
+	dot-gen: e -> res
+	with
+		new-tree := <preprocess-tree> e;
+		<debug(!"new tree")> new-tree;
+		res := $[digraph {
+			[<to-dot-s> new-tree]
+			}]
+	
 	to-dot: Node(e1, Transient(Node(e2, _))) -> (e1, e2)
 	to-dot: Node(e1, Transient(Leaf(Stop(e2)))) -> (e1, e2)
-	to-dot: Node(e1, Transient(Leaf(Fold(e2, renamings)))) -> (e1{Foldable()}, <substitute(|renamings)> e2)
+	to-dot: Node(e1, Transient(Leaf(Fold(e2, e3)))) -> (e1, e3)
+	with
+		<debug(!"to-dot fold")> (e1,e2,e3)
 
-    to-dot: Leaf(Fold(e, renamings)) -> (<preserve-annotation(substitute(|renamings))> e{Foldable()}, e)
+    to-dot: Leaf(Fold(e1, e2)) -> res
+    with
+    	annos := <get-annotations> e2;
+    	e2' := <set-annotations> (e2, [Foldable()|annos]);
+    	res := (e2', e1)
+    	
 
 	to-dot: Node(e1, Variants(p*, e*)) -> res
     with
@@ -28,24 +46,91 @@ rules
     annotate(|annos): (anno, (e1, e2)) -> (<set-annotations> (e1, [anno|annos]), e2)
 
     to-dot: Node(e1, Decompose(e*)) -> res
-    with
-        <debug> e1;
+    with        
         res := <map(to-dot'(|e1))> e*
 
     to-dot'(|e1): Node(e2, _) -> (e1, e2)
     to-dot'(|e1): Leaf(Stop(e2)) -> (e1, e2)
-    to-dot'(|e1): Leaf(Fold(e2, renamings)) -> (e1, <substitute(|renamings)> e2)
+    to-dot'(|e1): Leaf(Fold(e2, e3)) -> (e1, e3)
 
-	to-dot-s = collect-all(to-dot); flatten-list; pp-dot'
+	to-dot-s = collect-all(try(update-nodes-mapping(|<new>)); preserve-annotation(to-dot)); preserve-annotation(flatten-list); pp-dot'
 
-	pp-dot': (e1, e2) -> $["[<pp-sll-string> e1]" -> "[<pp-sll-string> e2]" [attrs];
-                           ]
+	pp-dot': (e1, e2) -> 
+		$[[node1];
+    	  [node2];
+    	  "[e1]" -> "[e2]"[attrs];
+         ]
     where
-    	style := <if get-annotations; collect-one(?Foldable()) then !"style=\"dashed\"" else !"" end> e1;
-    	label := <if get-annotations; collect-one(?Label(pat)) then !$[label="[pat]"] else !"" end> e1;
-    	attrs := ${[{style} {label}]}
+    	node1 := ${{e1}[label="{<get-annotation(?NodeLabel(<id>))> e1}"]};
+    	node2 := ${{e2}[label="{<get-annotation(?NodeLabel(<id>))> e2}"]};
+    	<(get-annotations; collect-one(?Label(pat)))> e1;
+    	<debug(!"Expr: ")> <pp-sll-string> e2;
+    	attrs := ${[label="{pat}"]}    	
 
+	pp-dot': (e1, e2) -> 
+		$[[node1];
+    	  [node2];
+		  [point1];
+		  {
+			[part1];
+		  }
+		  [part2];
+		  ]           
+    where
+    	node1 := ${{e1}[label="{<get-annotation(?NodeLabel(<id>))> e1}"]};
+    	node2 := ${{e2}[label="{<get-annotation(?NodeLabel(<id>))> e2}"]};
+    	<get-annotations; collect-one(?Foldable())> e1;
+    	point1-label := <new>;
+    	point1 := ${{point1-label}[shape=point]};
+    	<debug(!"Expr: ")> <pp-sll-string> e2;
+    	part1 := ${
+    		"{e1}" -> {point1-label}[arrowhead=none, style="dashed"]
+    		};
+    	part2 := ${{point1-label} -> "{e2}"[style="dashed"]}
+   
+   // pp-dot': (e1, e2) -> 
+   // 		${{v1}[label="{<pp-sll-string> e1}"];
+   // 		  {v1} -> "{<pp-sll-string> e2}";
+   //       }
+   // where
+   // 	v1 := <new>;
+   // 	<get-annotations; collect-one(?Unfoldable())> e1
+    get-annotation(s) = get-annotations; collect-one(s) 
+   
+    pp-dot': (e1, e2) -> 
+    	$[[node1];
+    	  [node2];
+    	  "[e1]" -> "[e2]";
+         ]
+    with
+    	node1 := ${{e1}[label="{<get-annotation(?NodeLabel(<id>))> e1}"]};
+    	node2 := ${{e2}[label="{<get-annotation(?NodeLabel(<id>))> e2}"]}    	
+    
 	pp-dot': e* -> $[[<map(pp-dot')> e*]]
 	with
 	    <debug> e*
+	
+	update-nodes-mapping(|name): node -> node
+	where
+		label := <(?Node(<id>,_) <+ ?Leaf(Stop(<id>)) <+ (?Leaf(Fold(<id>, renamings)); substitute(|renamings))); pp-sll-string> node;
+		rules (nodes-mapping:+ label -> name)	
+		
+	preprocess-tree = topdown(try(rename-node)); debug
+		
+	rename-node: Leaf(Fold(e, renamings)) -> Leaf(Fold(new-label{NodeLabel(<pp-sll-string> e)}, <new>{NodeLabel(<substitute(|renamings); pp-sll-string> e)}))
+	where
+		<debug(!"Mapping")> <all-keys-nodes-mapping>;
+		<debug(!"Renaming fold")> (e);		
+		new-label := <nodes-mapping> <pp-sll-string> e	
 
+	rename-node: n@Node(e1, e2) -> Node(new-label{NodeLabel(<pp-sll-string> e1)}, e2)
+	where
+		new-label := <new>;		
+		<update-nodes-mapping(|new-label)> n;
+		<debug(!"rename: ")> (e1, new-label)
+	
+	rename-node: n@Leaf(Stop(e)) -> Leaf(Stop(new-label{NodeLabel(<pp-sll-string> e)}))
+	where
+		new-label := <new>;
+		<update-nodes-mapping(|new-label)> n;
+		<debug(!"rename: ")> (e, new-label)	

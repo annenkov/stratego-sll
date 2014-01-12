@@ -98,7 +98,7 @@ rules // Main editor interface (defined by editor/SLL-Builders and -References.e
         proposals := <all-keys-GetFunc>
 
   // DOT file generation
-  generate-dot: (selected, position, ast, path, project-path) -> (filename, <to-dot-s> conf-tree)
+  generate-dot: (selected, position, ast, path, project-path) -> (filename, <dot-gen> conf-tree)
   with
       filename := <guarantee-extension(|"dot")> path;
       <collect-one(?MainDef(Expr(main-def)))> selected;
