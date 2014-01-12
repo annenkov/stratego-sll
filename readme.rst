@@ -81,6 +81,22 @@ But here we have some interesting alternatives:
 
 Poorly documented some features - dynamic rules, Name Binding Analysis (NaBL).
 
+Configuration graph vizualization
+---------------------------------
+
+Configuration graph can be translated to DOT-format. This format can be used to vizualaze graph in GraphViz and related tools.
+One can use Eclipse Zest Plugin (http://wiki.eclipse.org/Zest/DOT) to view DOT files.
+
+.. image:: https://github.com/annenkov/stratego-sll/raw/master/media/dot-graph.png
+
+Another way is to install GraphViz and use dot tool directly. For example, in Ubuntu one cat install GraphViz using apt-get::
+
+   sudo apt-get install graphviz
+
+To generate, for example, jpeg image use following command::
+
+   dot <source_dot_file> -Tjpg -o<resulting_jpg>
+
 References
 ----------
 .. [1] Ilya Klyuchnikov. The ideas and methods of supercompilation. `Practice of Functional Programming <http://fprog.ru/2011/issue7/>`_, 7, 2011. In Russian.

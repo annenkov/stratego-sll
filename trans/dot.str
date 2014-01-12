@@ -76,7 +76,7 @@ rules
     	node1 := ${{e1}[label="{<get-annotation(?NodeLabel(<id>))> e1}"]};
     	node2 := ${{e2}[label="{<get-annotation(?NodeLabel(<id>))> e2}"]};
     	<get-annotations; collect-one(?Foldable())> e1;
-    	edge := ${{e1} -> "{e2}"[style="dashed"]}
+    	edge := ${{e1} -> "{e2}"[style="dashed"}
 
    // pp-dot': (e1, e2) ->
    // 		${{v1}[label="{<pp-sll-string> e1}"];
