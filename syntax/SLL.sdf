@@ -15,10 +15,11 @@ exports
     "main" "=" Main                                   -> Definition {cons("MainDef")}
     Expr                                              -> Main {cons("Expr")}
     FUNCNAME "(" {Var ","}* ")" "=" Expr              -> Definition {cons("FDef")}
-    FUNCNAME "(" Pattern ")" "=" Expr     -> Definition {cons("GDef")}
-    FUNCNAME "(" Pattern "," {Var ","}* ")" "=" Expr     -> Definition {cons("GDef")}
+    FUNCNAME "(" Pattern ")" "=" Expr                 -> Definition {cons("GDef")}
+    FUNCNAME "(" Pattern "," {Var ","}* ")" "=" Expr  -> Definition {cons("GDef")}
     CTOR"(" {Var ","}* ")"                            -> Pattern {cons("Pat")}
     ID                                                -> Var {cons("DVar")}
     FUNCNAME"(" {Expr ","}* ")"                       -> Expr {cons("FCall")}
     CTOR"(" {Expr ","}* ")"                           -> Expr {cons("Ctor")}
     ID                                                -> Expr {cons("Var")}
+    "Let" ID "=" Expr "in" Expr                       -> Expr {cons("Let")}

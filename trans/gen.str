@@ -42,8 +42,13 @@ rules
 
     gen: Node(Ctor(name, args*), Decompose(t*)) -> (Ctor(name, calls*), defs*)
     with
-        <debug(!"Gen decompose")> t*;
+        <debug(!"Gen decompose: ")> t*;
        (calls*, defs*) := <gen'> t*
+       
+    gen: Node(Let(var-name, _, _), Decompose(t*)) -> (<substitute(|[(var-name, c1)])> c2, defs*)
+    with
+        <debug(!"Gen decompose (let): ")> t*;
+       ([c1, c2], defs*) := <gen'> t*
 
     gen: Node(t1, Variants(pats*, t*)) -> (call1, <conc> (defs*, gdefs*))
     with

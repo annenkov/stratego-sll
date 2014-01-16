@@ -15,5 +15,6 @@
    FCall.2:iter-star-sep -- _1 KW[","],
    Ctor                  -- _1 KW["("] _2 KW[")"],
    Ctor.2:iter-star-sep  -- _1 KW[","],
-   Var                   -- _1
+   Var                   -- _1,
+   Let                   -- KW["Let"] _1 KW["="] _2 KW["in"] _3
 ]
