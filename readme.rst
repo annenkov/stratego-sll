@@ -42,13 +42,13 @@ Already done
 ------------
 * interpreter
 * tracer(as list of interpreter steps)
-* configuration tree building/folding (no generalization yet)
+* configuration tree building/folding
+* configuration generalization
 * program generation
 * deforestation
 
 To be done
 ----------
-* generalization
 * positive information propagation
 * explicit parameterization of configuration tree builder by folding strategy
 
