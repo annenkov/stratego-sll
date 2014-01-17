@@ -37,11 +37,11 @@ rules
     	res := (e2', e1)
 
 
-	to-dot: Node(e1, Variants(p*, e*)) -> res
+	to-dot: Node(e1, Variants(v, p*, e*)) -> res
     with
         <debug> e1;
         annos := <get-annotations> e1;
-        res := <map(annotate(|annos))> <zip> (<map(\t -> Label(<pp-sll-string> t) \)> p*, <map(to-dot'(|e1))> e*)
+        res := <map(annotate(|annos))> <zip> (<map(\t -> Label($[[v]=[<pp-sll-string> t]]) \)> p*, <map(to-dot'(|e1))> e*)
 
     annotate(|annos): (anno, (e1, e2)) -> (<set-annotations> (e1, [anno|annos]), e2)
 

@@ -15,7 +15,7 @@ signature
         Transient   : Expr -> Step
         Fold        : Expr * [String] -> Step
         Stop        : Expr -> Step
-        Variants    : [Pattern] * [Expr] -> Step
+        Variants    : String * [Pattern] * [Expr] -> Step
         Decompose   : [Expr] -> Step
 
         Node        : Expr * Step -> Tree
@@ -25,10 +25,10 @@ signature
         Right       : Expr -> Either
 rules
 	max-conf-size = !20
-	
+
     prettify-tree(pp) = topdown(try(pp))
 
-    build-conf-tree(r|prog): t -> <ana-tree(try(generalize); drive(r|prog))> t
+    build-conf-tree(r,p|prog): t -> <ana-tree(try(generalize); drive(r|prog); try(p))> t
     with
         init-trace
 
@@ -52,9 +52,9 @@ rules
         <debug> <pp-sll-string> new-t;
         <if (?FCall(_,_)) then update-trace(|t) end> new-t
 
-    drive(r|prog): t@FCall(_, _) -> (t, Variants(pats*, <map(r)> funcalls*))
-    where    	
-        (pats*, funcalls*) := <variants-r(|prog)> t;
+    drive(r|prog): t@FCall(_, _) -> (t, Variants(v, pats*, <map(r)> funcalls*))
+    where
+        (v, pats*, funcalls*) := <variants-r(|prog)> t;
         <debug(!"Variants: ")> funcalls*;
         <not(foldable)> t;
         update-trace(|t)
@@ -64,24 +64,24 @@ rules
         <debug(!"Trying to fold: ")> t;
         (folded-to, renamings) := <foldable> t;
         <debug(!"Foldable: ")> (<pp-sll-string> t, <pp-sll-string> folded-to)
-    
+
     drive(r|prog): t@Let(v, sub-expr, body) -> (t, Decompose([sub-expr, body]))
     where
         <not(is-complete)> t;
         <debug(!"Decompose on Let: ")> t
-    
+
     generalize: t@FCall(f-name, args*) -> Let(new-var, max-subconf, let-body)
     where
         <gti> (<conf-size> t, <max-conf-size>);
         max-subconf := <exatract-max-conf> args*;
         new-var := <gen-name(|"v")>;
         let-body := FCall(f-name, <map(try(?max-subconf; !Var(new-var)))> args*)
-        
+
     max-conf: (c1, c2) -> c
     where
     	<debug(!"max-conf: ")> (c1, c2);
     	c := <if gti then !c1 else !c2 end> (<conf-size> c1, <conf-size> c2)
-    
+
     exatract-max-conf = ?[fst|_]; foldr(!fst, max-conf)
 
     foldable: t -> (t', renamings)
@@ -95,15 +95,15 @@ rules
             case ?Stop(t): !Leaf(Stop(t))
             case ?Fold(t, renamings): !Leaf(Fold(t, renamings))
             case ?(t, Decompose(y)): !Node(t, Decompose(<map(ana-tree(unspool))> y))
-            case ?(t, Variants(pats*, y)): !Node(t, Variants(pats*, <map(ana-tree(unspool))> y))
+            case ?(t, Variants(v, pats*, y)): !Node(t, Variants(v, pats*, <map(ana-tree(unspool))> y))
             case ?(t, Transient(y)): !Node(t, Transient(<ana-tree(unspool)> y))
         end
 
     variants-r(|prog) = variants(|prog) <+ (?FCall(name, [a|args*]); <variants-r(|prog)> a; inject(|name, args*))
 
-    inject(|name, args*) = (id, map(!FCall(name, [<id>|args*])))
+    inject(|name, args*) = (id, id, map(!FCall(name, [<id>|args*])))
 
-    variants(|prog): fcall@FCall(f-name, [Var(_)|_]) -> (pats*, fcalls*)
+    variants(|prog): fcall@FCall(f-name, [Var(v)|_]) -> (v, pats*, fcalls*)
     where
         g-defs* := <collect-all(?GDef(f-name, _,_,_) <+ ?GDef(f-name, _,_)); ?[_|_]> prog;
         res := <map(variants-step(|fcall))> g-defs*;
@@ -151,6 +151,12 @@ rules
     remove-transient: Node(t, Transient(n)) -> n
     where
         <not(is-base(|t))> n
-    is-base(|t) = collect-one(?Fold(t, _))  
-    
-    conf-size = occurrences(?FCall(_,_) <+ ?Ctor(_,_) <+ ?Var(_) <+ ?Let (_,_,_)) 
+    is-base(|t) = collect-one(?Fold(t, _))
+
+    conf-size = occurrences(?FCall(_,_) <+ ?Ctor(_,_) <+ ?Var(_) <+ ?Let (_,_,_))
+
+    propagate: (t, Variants(v, pats*, vs*)) -> (t, Variants(v, pats*, res))
+    where
+        res := <map(propagate'(|v))> <zip> (pats*, vs*)
+
+    propagate'(|v): (pat, e) -> <substitute(|[(v, <pat2ctor> pat)])> e
