@@ -61,10 +61,11 @@ Configuration tree manipulations also very convenient with generic rewriting str
 
    For example, simplification used to deforest program::
 
-      simplify = bottomup(try(remove-transient))
+      simplify = ?t; bottomup(try(remove-transient(|t)))
 
-      remove-transient: Node(t, Transient(n)) -> n
-        where <not(is-base(|t))> n
+      remove-transient(|p): Node(t, Transient(n)) -> n
+      where
+          <not(is-base(|t))> p
 
       is-base(|t) = collect-one(?Fold(t, _))
 

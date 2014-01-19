@@ -42,11 +42,9 @@ rules
         args := <collect-vars> t1;
         name := <gen-name(|"f")>;
         call1 := FCall(name, args);
+        <update-mappings> (t1, call1);
         <debug(!"Gen transient")> (<pp-sll-string> call1, <pp-sll-string> t1);
-        (call2, defs*) := <gen> t2;
-    rules (
-        mapping:+ t1 -> call1
-        )
+        (call2, defs*) := <gen> t2
 
     gen: Node(Ctor(name, args*), Decompose(t*)) -> (Ctor(name, calls*), defs*)
     with
@@ -63,9 +61,7 @@ rules
         args := <collect-vars> t1;
         name := <gen-name(|"g")>;
         call1 := FCall(name, args);
-	    rules (
-	        mapping:+ t1 -> call1
-	        );
+	    <update-mappings> (t1, call1);
         <debug(!"Gen variants")> (<pp-sll-string> call1, <pp-sll-string> t1, args);
         (calls*, defs*) := <gen'> t*;
         gdefs* := <map(make-gdef(|name, args))> <zip> (pats*, calls*);
@@ -73,7 +69,7 @@ rules
 
     gen: Leaf(Fold(t, renamings)) -> (<substitute(|renamings)> t1, [])
     with
-        <debug> <all-keys-mapping>;
+        <debug(!"Mappings: ")> <map(pp-sll-string)> <all-keys-mapping>;
         t1 := <mapping> t
 
     gen: Leaf(Stop(t)) -> (t, [])
@@ -95,3 +91,10 @@ rules
     gen-helper: ((t1,t2), (e1, e2)) -> (<conc> (e1, [t1]), <conc> (e2, t2))
 
     collect-vars = collect-all(?Var(_), conc)
+
+    update-mappings: (t, call) -> []
+    with
+        <debug(!"Update mappings: ")> (t, call);
+        rules (
+            mapping:+ t -> call
+            )

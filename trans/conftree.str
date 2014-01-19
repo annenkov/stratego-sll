@@ -120,7 +120,6 @@ rules
 
     subst-once(|t, t'): FCall(name, args*) -> FCall(name, subst-args*)
     where
-        <debug> (t, t', args*);
         subst-args*  := <oncetd(?t; !t')> args*
 
     pat-with-new-vars: Pat(n, a*) -> Pat(n, new-vars*)
@@ -142,15 +141,14 @@ rules
 
     update-trace(|t): _ -> None()
     with
-        rules ( trace := <if ?FCall(_,_) then ![t|<trace>] else trace end> t );
-        //rules ( trace := [t|<trace>]);
-        <debug(!"Trace: ")> <map(pp-sll-string)> <trace>
+        rules ( trace := <if ?FCall(_,_) then ![t|<trace>] else trace end> t )
 
     // simplification rules used to deforest program
-    simplify = bottomup(try(remove-transient))
-    remove-transient: Node(t, Transient(n)) -> n
+    simplify = ?t; bottomup(try(remove-transient(|t)))
+    remove-transient(|p): Node(t, Transient(n)) -> n
     where
-        <not(is-base(|t))> n
+        <not(is-base(|t))> p
+
     is-base(|t) = collect-one(?Fold(t, _))
 
     conf-size = occurrences(?FCall(_,_) <+ ?Ctor(_,_) <+ ?Var(_) <+ ?Let (_,_,_))
