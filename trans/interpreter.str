@@ -37,10 +37,7 @@ rules
   rewrite-func(|prog):
     func@FCall(name, args*) -> f
     where
-      <debug(!"Function: ")> func;
       (body, env) := <get-func-def(|prog)> func;
-      <debug(!"Resolved body: ")> body;
-      <debug(!"Env: ")> env;
       f := <substitute(|env)> body
 
   rewrite-step(|prog) = rewrite-func(|prog) <+ FCall(id, [rewrite-step(|prog)|id])
@@ -53,7 +50,6 @@ rules
   build-env:
     (vars*@[v|_], [Ctor(n, []), args*]) -> env
     with
-      <debug> (vars*, args*);
       env := <zip> (<map(?DVar(<id>))>vars*, args*)
 
   build-env:
@@ -71,8 +67,7 @@ rules
 
   substitute(|env) : Var(a) -> arg
       where
-        arg := <lookup>(a, env);
-        <debug(!$[Substitite: [a]--->])> arg
+        arg := <lookup>(a, env)
 
   substitute(|env) : e@Var(a) -> e
       where <not(lookup)> (a, env)

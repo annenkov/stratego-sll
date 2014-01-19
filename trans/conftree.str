@@ -45,11 +45,9 @@ rules
 
     drive(r|prog): t@FCall(_, _) -> (t, Transient(new-t))
     where
-        debug(!"Pre transient: ");
         <not(foldable)> t;
         new-t := <r> t;
         <debug(!"Transient: ")> (<pp-sll-string> t, <pp-sll-string> new-t);
-        <debug> <pp-sll-string> new-t;
         <if (?FCall(_,_)) then update-trace(|t) end> new-t
 
     drive(r|prog): t@FCall(_, _) -> (t, Variants(v, pats*, <map(r)> funcalls*))
@@ -61,7 +59,6 @@ rules
 
     drive(r|prog): t@FCall(_, _) -> Fold(folded-to, renamings)
     where
-        <debug(!"Trying to fold: ")> t;
         (folded-to, renamings) := <foldable> t;
         <debug(!"Foldable: ")> (<pp-sll-string> t, <pp-sll-string> folded-to)
 
@@ -79,7 +76,6 @@ rules
 
     max-conf: (c1, c2) -> c
     where
-    	<debug(!"max-conf: ")> (c1, c2);
     	c := <if gti then !c1 else !c2 end> (<conf-size> c1, <conf-size> c2)
 
     exatract-max-conf = ?[fst|_]; foldr(!fst, max-conf)
