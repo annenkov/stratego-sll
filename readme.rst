@@ -44,12 +44,12 @@ Already done
 * tracer(as list of interpreter steps)
 * configuration tree building/folding
 * configuration generalization
+* positive information propagation
 * program generation
 * deforestation
 
 To be done
 ----------
-* positive information propagation
 * explicit parameterization of configuration tree builder by folding strategy
 
 Stratego pros and cons
