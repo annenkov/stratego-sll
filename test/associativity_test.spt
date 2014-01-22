@@ -1,6 +1,7 @@
 /**
 * Testing associativity of addition by supercompilation
 * "add(add(x, y), z)" and "add(x, add(y, z))" transformed to the same program,
+* hence, add(add(x, y), z) = add(x, add(y, z))
 */
 module associativity_tests
 
