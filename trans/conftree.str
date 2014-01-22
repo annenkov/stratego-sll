@@ -83,8 +83,7 @@ rules
     foldable: t -> (t', renamings)
     where
         // using direct or reverse order of serching foldable nodes gives different configuration trees
-        t' := <getfirst(eq-mod-renaming(|t))> <trace>;
-        renamings := <zip> (<collect-all(?Var(<id>))> t', <collect-all(?Var(_))> t)
+        (t', renamings) := <getfirst(eq-mod-renaming(|t))> <trace>
 
     ana-tree(unspool) =
         switch unspool
@@ -124,9 +123,10 @@ rules
 
     pat2ctor: Pat(name, args*) -> Ctor(name, <topdown(try(\DVar(x) -> Var(x)\))> args*)
 
-    eq-mod-renaming(|t1): t2 -> t2
+    eq-mod-renaming(|t1): t2 -> (t2, renamings)
     where
-    	<equal> (<erase-names> t1, <erase-names> t2)
+    	<equal> (<erase-names> t1, <erase-names> t2);
+    	renamings := <zip> (<collect-all(?Var(<id>))> t2, <collect-all(?Var(_))> t1)
 
     erase-names = topdown(try(?Var(_); !Var("_")))
 
