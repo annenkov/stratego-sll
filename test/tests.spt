@@ -40,12 +40,20 @@ test Equal modulo renaming [[
         g(y) = add(S(y), Z())
 ]] run test-eq
 
-test Not equal modulo renaming [[
+test Not equal modulo renaming (different structure) [[
         add(Z(), y) = y
         add(S(x), y) = S(add(x,y))
 
         f(x) = add(S(S(x)), Z())
         g(y) = add(S(y), Z())
+]] run test-not-eq
+
+test Not equal modulo renaming (repeated variable) [[
+        add(Z(), y) = y
+        add(S(x), y) = S(add(x,y))
+
+        f(x, y) = add(S(x), x)
+        g(z, v) = add(S(z), v) 
 ]] run test-not-eq
 
 test Generate transients[[
