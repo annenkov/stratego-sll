@@ -1,0 +1,43 @@
+/**
+* Testing associativity of addition by supercompilation
+* "add(add(x, y), z)" and "add(x, add(y, z))" transformed to the same program,
+*/
+module associativity_tests
+
+language SLL
+
+setup Common [[	
+     program example
+     
+]]
+
+test Addition associativity 1 [[
+	
+	 add(Z(), y) = y
+     add(S(x), y) = S(add(x,y))
+     main = add(add(x, y), z)
+
+]] run test-deforest to
+[[	
+	g2(Z(),z)=z
+	g2(S(v2),z)=S(g2(v2,z))
+	g1(Z(),y,z)=g2(y,z)
+	g1(S(v1),y,z)=S(g1(v1,y,z))
+	
+	main = g1(x,y,z)
+]]
+
+test Addition associativity 2 [[
+	 add(Z(), y) = y
+     add(S(x), y) = S(add(x,y))
+     main = add(x, add(y, z))
+
+]] run test-supercompile to
+[[
+	g2(Z(),z)=z
+	g2(S(v2),z)=S(g2(v2,z))
+	g1(Z(),y,z)=g2(y,z)
+	g1(S(v1),y,z)=S(g1(v1,y,z))
+	
+	main = g1(x,y,z)
+]]

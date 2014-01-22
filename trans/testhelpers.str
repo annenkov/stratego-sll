@@ -20,3 +20,7 @@ rules
     test-deforest: t -> <deforest-program(rewrite-step-alt(|t)|t)> e
     with
         <collect-one(?MainDef(Expr(e)))> t
+        
+    test-supercompile: t -> <supercompile-program(rewrite-step-alt(|t)|t)> e
+    with
+        <collect-one(?MainDef(Expr(e)))> t
