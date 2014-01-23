@@ -18,7 +18,7 @@ test Addition associativity 1 [[
      add(S(x), y) = S(add(x,y))
      main = add(add(x, y), z)
 
-]] run test-deforest to
+]] run test-supercompile to
 [[	
 	g2(Z(),z)=z
 	g2(S(v2),z)=S(g2(v2,z))
