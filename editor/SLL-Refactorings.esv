@@ -1,0 +1,17 @@
+module SLL-Refactorings
+
+imports SLL-Refactorings.generated
+
+refactorings
+
+//pretty-print : pp-sll-string
+
+refactoring FUNCNAME : "Rename" = rename-function (cursor)
+    shortcut: "org.eclipse.jdt.ui.edit.text.java.rename.element"
+    input
+        identifier: "New name" = ""
+
+refactoring _: "Extract" = extract-function (cursor)
+    shortcut: "org.eclipse.jdt.ui.edit.text.java.extract.method"
+    input
+        identifier: "New name" = ""

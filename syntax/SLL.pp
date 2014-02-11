@@ -13,5 +13,6 @@
    Ctor                  -- H hs=0 [_1 KW ["("] _2 KW[")"]],
    Ctor.2:iter-star-sep  -- _1 KW [","],
    Pat                   -- H hs=0 [_1 KW["("] _2 KW[")"]],
-   Pat.2:iter-star-sep   -- H hs=0 [_1 KW[","]]
+   Pat.2:iter-star-sep   -- H hs=0 [_1 KW[","]],
+   DVar                  -- _1
 ]

@@ -1,16 +1,16 @@
 module SLL.main
 
-imports SLL-Builders SLL-Colorer SLL-Completions SLL-Folding SLL-Outliner SLL-References SLL-Syntax
+imports SLL-Builders SLL-Colorer SLL-Completions SLL-Folding SLL-Outliner SLL-References SLL-Syntax SLL-Refactorings
 
 language General properties
-                  
+
   name          : SLL
   id            : SLL
   extends       : Root
-                  
+
   description   : "Spoofax/IMP-generated editor for the SLL language"
   url           : http://strategoxt.org
-                  
+
   extensions    : sll
   table         : include/SLL.tbl
   start symbols : Start

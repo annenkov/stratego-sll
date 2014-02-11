@@ -38,15 +38,6 @@ rules
       )
 rules
 
-  // Reports an error if a property type is undefined.
-  // This error is reported on the type name 'type'.
-  constraint-error:
-    Property(x, Type(type)) -> (type, $[Type [type] is not defined])
-    where
-      not(!type => "String"); // String and Int are built-in types
-      not(!type => "Int");
-      not(<GetFunc> type) // no entity for this type
-
   // Reports an error if an entity is defined more than once.
   // This constraint is implemented by testing if the "bag" of
   // all entities x is not a singleton list.

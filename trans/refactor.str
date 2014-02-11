@@ -8,21 +8,42 @@ imports
 
 rules
 
-  rename-entity:
+rename-function:
     (newname, selected-name, position, ast, path, project-path) -> ([(ast, new-ast)], fatal-errors, errors, warnings)
-    with
-      new-ast  := <topdown(try(rename-type(|selected-name, newname)))> ast;
-      (errors, warnings) := <semantic-constraint-issues> (ast, new-ast);
-      fatal-errors := []
+with
+    new-ast  := <topdown(try(ren-func(|selected-name, newname)))> ast;
+    (errors, warnings) := <semantic-constraint-issues> (ast, new-ast);
+    fatal-errors := []
 
-  rename-type(|old-name, new-name):
-    Entity(old-name, y) -> Entity(new-name, y)
+ren-func(|old-name, new-name): FDef(old-name, args*, body) -> FDef(new-name, args*, body)
+ren-func(|old-name, new-name): GDef(old-name, pat, args*, body) -> GDef(new-name, pat, args*, body)
+ren-func(|old-name, new-name): GDef(old-name, pat, body) -> FDef(new-name, pat, body)
+ren-func(|old-name, new-name): FCall(old-name, body) -> FCall(new-name,body)
 
-  rename-type(|old-name, new-name):
-    Type(old-name) -> Type(new-name)
+extract-function:
+    (newname, selected-body, position, ast, path, project-path) -> ([(ast, new-ast)], fatal-errors, errors, warnings)
+where
+    new-def := <make-func-def(|newname)> selected-body;
+    new-ast  := <topdown(try(extract-func(|selected-body, newname))); Program(id, insert-def(|0, new-def))> ast;
+    <debug> <pp-sll-string> new-ast;
+    <debug> <pp-sll-string> DVar("x");
+    (errors, warnings) := <semantic-constraint-issues> (ast, new-ast);
+    fatal-errors := []
 
-  semantic-constraint-issues:
+insert-def(|index, definition): lst -> <insert> (index, definition, lst)
+where
+    <debug> definition;
+    <debug> <insert> (index, definition, lst)
+
+extract-func(|body, name): body -> FCall(name, <collect-all(?Var(_))> body)
+where
+    <debug> FCall(name, <collect-all(?Var(_), conc)> body)
+
+make-func-def(|name): body -> FDef(name, [], Ctor("Z",[]))
+
+
+semantic-constraint-issues:
     (ast, new-ast) -> (<diff>(new-errors, errors), <diff>(new-warnings, warnings))
-    where
-      (_, errors, warnings, _) := <editor-analyze> (ast, "", "");
-      (_, new-errors, new-warnings, _) := <editor-analyze> (new-ast, "", "")
+where
+    (_, errors, warnings, _) := <editor-analyze> (ast, "", "");
+    (_, new-errors, new-warnings, _) := <editor-analyze> (new-ast, "", "")
