@@ -18,7 +18,7 @@ with
     (errors, warnings) := <semantic-constraint-issues> (ast, new-ast);
     fatal-errors := []
 
-ren-func(|old-name, new-name): FDef(old-name, args*, body) -> GDef(new-name, args*, body)
+ren-func(|old-name, new-name): FDef(old-name, args*, body) -> FDef(new-name, args*, body)
 ren-func(|old-name, new-name): GDef(old-name, pat, args*, body) -> GDef(new-name, pat, args*, body)
 ren-func(|old-name, new-name): GDef(old-name, pat, body) -> FDef(new-name, pat, body)
 ren-func(|old-name, new-name): FCall(old-name, body) -> FCall(new-name, body)
