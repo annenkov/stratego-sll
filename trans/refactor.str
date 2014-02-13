@@ -5,6 +5,9 @@ imports
   include/SLL
   lib/editor-common.generated
   sll
+  interpreter
+  gen
+  utils
 
 rules
 
@@ -15,31 +18,31 @@ with
     (errors, warnings) := <semantic-constraint-issues> (ast, new-ast);
     fatal-errors := []
 
-ren-func(|old-name, new-name): FDef(old-name, args*, body) -> FDef(new-name, args*, body)
+ren-func(|old-name, new-name): FDef(old-name, args*, body) -> GDef(new-name, args*, body)
 ren-func(|old-name, new-name): GDef(old-name, pat, args*, body) -> GDef(new-name, pat, args*, body)
 ren-func(|old-name, new-name): GDef(old-name, pat, body) -> FDef(new-name, pat, body)
-ren-func(|old-name, new-name): FCall(old-name, body) -> FCall(new-name,body)
+ren-func(|old-name, new-name): FCall(old-name, body) -> FCall(new-name, body)
 
 extract-function:
     (newname, selected-body, position, ast, path, project-path) -> ([(ast, new-ast)], fatal-errors, errors, warnings)
 where
     new-def := <make-func-def(|newname)> selected-body;
-    new-ast  := <topdown(try(extract-func(|selected-body, newname))); Program(id, insert-def(|0, new-def))> ast;
-    <debug> <pp-sll-string> new-ast;
-    <debug> <pp-sll-string> DVar("x");
+    new-ast := <topdown(try(extract-func(|selected-body, newname))); Program(id, insert-def(|new-def))> ast;
     (errors, warnings) := <semantic-constraint-issues> (ast, new-ast);
+    prog-before := <collect-one(?MainDef(Expr(<id>))); deforest-program(rewrite-step-alt(|ast)|ast)> ast;
+    reset-name-counter(|"f");
+    reset-name-counter(|"g");
+    reset-name-counter(|"v");
+    prog-after := <collect-one(?MainDef(Expr(<id>))); deforest-program(rewrite-step-alt(|new-ast)|new-ast)> new-ast;
+    // checking equality by transformation
+    <eq> (prog-before, prog-after);
     fatal-errors := []
 
-insert-def(|index, definition): lst -> <insert> (index, definition, lst)
-where
-    <debug> definition;
-    <debug> <insert> (index, definition, lst)
+insert-def(|definition): lst -> <insert> (0, definition, lst)
 
 extract-func(|body, name): body -> FCall(name, <collect-all(?Var(_))> body)
-where
-    <debug> FCall(name, <collect-all(?Var(_), conc)> body)
 
-make-func-def(|name): body -> FDef(name, [], Ctor("Z",[]))
+make-func-def(|name): body -> FDef(name, <collect-all(?Var(_)); map(\ Var(n) -> DVar(n) \)> body, body)
 
 
 semantic-constraint-issues:

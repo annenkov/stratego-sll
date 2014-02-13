@@ -108,3 +108,8 @@ rules // Main editor interface (defined by editor/SLL-Builders and -References.e
       filename := <guarantee-extension(|"dot")> path;
       <collect-one(?MainDef(Expr(main-def)))> selected;
       conf-tree := <build-conf-tree(rewrite-step-alt(|ast),id|ast)> main-def
+  // some workarounds
+  my-pp-sll-string: (t, _, _, _, _) -> <debug(!"pp: "); pp-sll-string> t
+  my-pp-sll-string: t -> <debug(!"pp: "); pp-sll-string> t
+
+  reconstruct-term: (old, new) -> <try(my-pp-sll-string)> new
