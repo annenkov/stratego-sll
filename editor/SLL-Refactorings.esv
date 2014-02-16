@@ -16,7 +16,7 @@ refactoring FUNCNAME : "Rename" = rename-function (cursor)
     input
         identifier: "New name" = ""
 
-refactoring _: "Extract" = extract-function (source)
+refactoring Expr: "Extract" = extract-function (source)
     shortcut: "org.eclipse.jdt.ui.edit.text.java.extract.method"
     input
         identifier: "New name" = ""

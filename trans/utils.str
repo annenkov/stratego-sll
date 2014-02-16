@@ -13,9 +13,15 @@ rules
         not(<counter> prefix);
         (rules (counter: prefix -> 1))
 
-    reset-name-counter(|prefix): _ -> []
+    reset-names-for(|prefixes): _ -> None()
     where
-        (rules (counter: prefix -> 0))
+        <list-loop(reset-name-counter)> prefixes
+
+    reset-name-counter: prefix -> None()
+    with
+         rules (
+             counter: prefix -> 0
+             )
 
     string-join(|c) = <foldl(\(x,y) -> <concat-strings> [y, c, x]\)> (<Tl>, <Hd>)
     string-join(|c) : [] -> ""

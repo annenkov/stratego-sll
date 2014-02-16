@@ -30,9 +30,7 @@ where
     new-ast := <topdown(try(change-funcall(|selected-body, newname))); Program(id, insert-def(|new-def))> ast;
     (errors, warnings) := <semantic-constraint-issues> (ast, new-ast);
     prog-before := <collect-one(?MainDef(Expr(<id>))); deforest-program(rewrite-step-alt(|ast)|ast)> ast;
-    reset-name-counter(|"f");
-    reset-name-counter(|"g");
-    reset-name-counter(|"v");
+    reset-names-for(|["f", "g", "v"]);
     prog-after := <collect-one(?MainDef(Expr(<id>))); deforest-program(rewrite-step-alt(|new-ast)|new-ast)> new-ast;
     // checking equality by transformation
     <eq> (prog-before, prog-after);
@@ -43,7 +41,6 @@ insert-def(|definition): lst -> <insert> (0, definition, lst)
 change-funcall(|body, name): body -> FCall(name, <collect-all(?Var(_))> body)
 
 make-func-def(|name): body -> FDef(name, <collect-all(?Var(_)); map(\ Var(n) -> DVar(n) \)> body, body)
-
 
 semantic-constraint-issues:
     (ast, new-ast) -> (<diff>(new-errors, errors), <diff>(new-warnings, warnings))

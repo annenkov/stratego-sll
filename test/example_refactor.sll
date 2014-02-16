@@ -1,0 +1,15 @@
+/**
+* Example that can be used to test refactroings
+*/
+program example
+
+add(Z(), y) = y
+add(S(x), y) = S(add(x,y))
+
+mult(Z(), y) = Z()
+mult(S(x), y) = add(y, mult(x,y))
+
+// f = a*x*x + b*x + c, we can exatract x*x function under "sqr" name
+f(x, a, b, c) = add(add(mult(mult(x,x),a), mult(x,b)), c)
+
+main = f(x, S(Z()), Z(), Z())
