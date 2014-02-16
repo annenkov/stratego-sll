@@ -29,12 +29,12 @@ Spoofax and Startego
 Spoofax Language Workbench [3]_ used as primary tool for writing interpreter and supercompiler. Spoofax is based on Stratego, which is a transformation language with programmable rewriting strategies and Syntax Definition Formalism, as language for grammar definition.
 Spoofax works on Eclipse platform and allows one to create full-featured IDE plugin with syntax highlighting, perform semantic analysis and context completion.
 
-.. image:: https://github.com/annenkov/stratego-sll/raw/master/media/sll-editor.png
+.. image:: https://github.com/annenkov/stratego-sll/raw/master/docs/media/sll-editor.png
 
 You can run, trace, apply transformations to source program and immediately get the result.
 
-.. image:: https://github.com/annenkov/stratego-sll/raw/master/media/sll-editor-run.png
-.. image:: https://github.com/annenkov/stratego-sll/raw/master/media/sll-editor-deforest.png
+.. image:: https://github.com/annenkov/stratego-sll/raw/master/docs/media/sll-editor-run.png
+.. image:: https://github.com/annenkov/stratego-sll/raw/master/docs/media/sll-editor-deforest.png
 
 As a result of transformation (deforestation, for example) you get another program that can be ran from the same "Transformation" menu.
 
@@ -88,7 +88,7 @@ Configuration graph vizualization
 Configuration graph can be translated to DOT-format. This format can be used to vizualaze graph in GraphViz and related tools.
 One can use Eclipse Zest Plugin (http://wiki.eclipse.org/Zest/DOT) to view DOT files.
 
-.. image:: https://github.com/annenkov/stratego-sll/raw/master/media/dot-graph.png
+.. image:: https://github.com/annenkov/stratego-sll/raw/master/docs/media/dot-graph.png
 
 Another way is to install GraphViz and use dot tool directly. For example, in Ubuntu one cat install GraphViz using apt-get::
 
@@ -97,6 +97,16 @@ Another way is to install GraphViz and use dot tool directly. For example, in Ub
 To generate, for example, jpeg image use following command::
 
    dot <source_dot_file> -Tjpg -o<resulting_jpg>
+
+Refactorings
+------------
+Two kind of automatic refactorings for SLL language are implemented:
+* rename
+* extract function
+
+The second one has experimental checking of equality of programs before and after refactoring using supercompilation.
+For further information see `Refactorings <https://github.com/annenkov/stratego-sll/raw/master/docs/refactorings.rst>`_
+
 
 References
 ----------
