@@ -105,7 +105,7 @@ Two kind of automatic refactorings for SLL language are implemented:
 * extract function
 
 The second one has experimental checking of equality of programs before and after refactoring using supercompilation.
-For further information see `Refactorings <https://github.com/annenkov/stratego-sll/raw/master/docs/refactorings.rst>`_
+For further information see `Refactorings <https://github.com/annenkov/stratego-sll/blob/master/docs/refactorings.rst>`_
 
 
 References
