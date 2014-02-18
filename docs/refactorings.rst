@@ -30,7 +30,7 @@ After applying the "extract function" refactoring we have the following program:
     main = f(x, S(Z()), Z(), Z())
 
 To check whether refactoring is correct, we can apply supercompilation technique.
-After supercompilation of both programs(in this case deforestation is enough) we should and with equal programs.
+After supercompilation of both programs(in this case deforestation is enough) we should end with equal programs.
 
 In this case such a program look as follows::
 
