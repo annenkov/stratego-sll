@@ -49,32 +49,32 @@ rules // Main editor interface (defined by editor/SLL-Builders and -References.e
     with
       filename := <guarantee-extension(|"aterm")> path;
       <collect-one(?MainDef(Expr(main-def)))> selected;
-      conf-tree := <build-conf-tree(rewrite-step-alt(|ast),id|ast)> main-def
+      conf-tree := <build-conf-tree(rewrite-small-step(|ast),id|ast)> main-def
 
   deforest-tree:
       (selected, position, ast, path, project-path) -> (filename, <prettify-tree(pp-sll-string)> conf-tree)
     with
       filename := <guarantee-extension(|"aterm")> path;
       <collect-one(?MainDef(Expr(main-def)))> selected;
-      conf-tree := <build-conf-tree(rewrite-step-alt(|ast),id|ast); simplify> main-def
+      conf-tree := <build-conf-tree(rewrite-small-step(|ast),id|ast); simplify> main-def
 
  transform: (selected, position, ast, path, project-path) -> (filename, <pp-sll-string> prog)
   with
       filename := <concat-strings> [<remove-extension> path, ".trans.sll"];
       <collect-one(?MainDef(Expr(main-def)))> selected;
-      prog := <transform-program(rewrite-step-alt(|ast)|ast)> main-def
+      prog := <transform-program(rewrite-small-step(|ast)|ast)> main-def
 
  deforest: (selected, position, ast, path, project-path) -> (filename, <pp-sll-string> prog)
   with
       filename := <concat-strings> [<remove-extension> path, ".trans.sll"];
       <collect-one(?MainDef(Expr(main-def)))> selected;
-      prog := <deforest-program(rewrite-step-alt(|ast)|ast)> main-def
+      prog := <deforest-program(rewrite-small-step(|ast)|ast)> main-def
 
  supercompile: (selected, position, ast, path, project-path) -> (filename, <pp-sll-string> prog)
   with
       filename := <concat-strings> [<remove-extension> path, ".trans.sll"];
       <collect-one(?MainDef(Expr(main-def)))> selected;
-      prog := <supercompile-program(rewrite-step-alt(|ast)|ast)> main-def
+      prog := <supercompile-program(rewrite-small-step(|ast)|ast)> main-def
 
 
     // Prints the abstract syntax ATerm of a selection.
@@ -107,7 +107,7 @@ rules // Main editor interface (defined by editor/SLL-Builders and -References.e
   with
       filename := <guarantee-extension(|"dot")> path;
       <collect-one(?MainDef(Expr(main-def)))> selected;
-      conf-tree := <build-conf-tree(rewrite-step-alt(|ast),id|ast)> main-def
+      conf-tree := <build-conf-tree(rewrite-small-step(|ast),id|ast)> main-def
   // some workarounds
   my-pp-sll-string: (t, _, _, _, _) -> <debug(!"pp: "); pp-sll-string> t
   my-pp-sll-string: t -> <debug(!"pp: "); pp-sll-string> t

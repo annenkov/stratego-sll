@@ -50,3 +50,4 @@ In this case such a program look as follows::
     g1(S(v1),x,x)=g3(x,v1,x,x)
     main = g1(x,x,x)
 
+Also, one can find an example of applying the supercompilation technique to prove associativity of addition by "syntactic comparison" of results in test/associativity_test.spt

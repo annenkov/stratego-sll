@@ -72,16 +72,16 @@ rules
   substitute(|env) : e@Var(a) -> e
       where <not(lookup)> (a, env)
 
-  // Idiomatic (for strategic term rewriting) version of eval
+  // Idiomatic version of eval
+  // (in sense of examples given in `Building Interpreters with Rewriting Strategies`)
   eval(r) = rec e(try(r; e); Ctor(id, map(e)))
 
-  // Alternative rewrite-step and eval (more suitable for tracing)
+  // Small-step semantics is more sutable for tracing and configuration tree building
+  small-step-eval(r) = rec e(try(r; e))
 
-  rewrite-step-alt(|prog) = rewrite-func(|prog) <+ FCall(id, [rewrite-step-alt(|prog)|id]) <+ Ctor(id, map(rewrite-step-alt(|prog)))
-
-  is-complete = not(collect-one(?FCall(_,_)))
-
-  eval-alt(r) = rec e(r; (is-complete <+ e))
+  rewrite-small-step(|prog) = rewrite-func(|prog)
+                           <+ FCall(id, [rewrite-small-step(|prog)|id])
+                           <+ Ctor(id, ?[_|_]; map(rewrite-small-step(|prog)))
 
   // Anamorphism on lists
   ana(unspool, finished): t -> [a|<if finished then ![] else ana(unspool, finished) end> y]
@@ -100,12 +100,14 @@ rules
   rewrite-main-def(|prog):
     Expr(body) -> t
     with
-      t := <eval(rewrite-step(|prog))> body
+      t := <small-step-eval(rewrite-small-step(|prog))> body
 
   rewrite-trace-main-def(|prog):
     Expr(body) -> [body|t]
     with
-      t := <eval-trace-ana(rewrite-step-alt(|prog))> body
+      t := <eval-trace-ana(rewrite-small-step(|prog))> body
+
+  is-complete = not(collect-one(?FCall(_,_)))
 
   // Using dynamic rules - not finished yet
   create-env:

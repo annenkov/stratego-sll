@@ -29,9 +29,9 @@ where
     new-def := <make-func-def(|newname)> selected-body;
     new-ast := <topdown(try(change-funcall(|selected-body, newname))); Program(id, insert-def(|new-def))> ast;
     (errors, warnings) := <semantic-constraint-issues> (ast, new-ast);
-    prog-before := <collect-one(?MainDef(Expr(<id>))); deforest-program(rewrite-step-alt(|ast)|ast)> ast;
+    prog-before := <collect-one(?MainDef(Expr(<id>))); deforest-program(rewrite-small-step(|ast)|ast)> ast;
     reset-names-for(|["f", "g", "v"]);
-    prog-after := <collect-one(?MainDef(Expr(<id>))); deforest-program(rewrite-step-alt(|new-ast)|new-ast)> new-ast;
+    prog-after := <collect-one(?MainDef(Expr(<id>))); deforest-program(rewrite-small-step(|new-ast)|new-ast)> new-ast;
     // checking equality by transformation
     <eq> (prog-before, prog-after);
     fatal-errors := []

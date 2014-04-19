@@ -13,14 +13,14 @@ rules
     test-eq: t -> <get-defs(?FDef("g", _, <id>) <+ ?FDef("f", _, <id>)); ?[t1, t2]; <eq-mod-renaming(|t1)> t2> t
     test-not-eq: t -> <not(test-eq)> t
 
-    test-transform: t -> <transform-program(rewrite-step-alt(|t)|t)> e
+    test-transform: t -> <transform-program(rewrite-small-step(|t)|t)> e
     with
         <collect-one(?MainDef(Expr(e)))> t
 
-    test-deforest: t -> <deforest-program(rewrite-step-alt(|t)|t)> e
+    test-deforest: t -> <deforest-program(rewrite-small-step(|t)|t)> e
     with
         <collect-one(?MainDef(Expr(e)))> t
         
-    test-supercompile: t -> <supercompile-program(rewrite-step-alt(|t)|t)> e
+    test-supercompile: t -> <supercompile-program(rewrite-small-step(|t)|t)> e
     with
         <collect-one(?MainDef(Expr(e)))> t
