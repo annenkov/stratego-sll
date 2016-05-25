@@ -74,7 +74,7 @@ Great support from Spoofax and Eclipse environment.
 Cons
 ~~~~
 
-Dynamic typing. This is significant for writing big programs.
+Dynamic typing. Some times I felt that some typing discipline would be helpful.
 But here we have some interesting alternatives:
 
 * `Kiama (Scala library) <http://code.google.com/p/kiama/>`_
@@ -90,7 +90,7 @@ One can use Eclipse Zest Plugin (http://wiki.eclipse.org/Zest/DOT) to view DOT f
 
 .. image:: https://github.com/annenkov/stratego-sll/raw/master/docs/media/dot-graph.png
 
-Another way is to install GraphViz and use dot tool directly. For example, in Ubuntu one cat install GraphViz using apt-get::
+Another way is to install GraphViz and use dot tool directly. For example, in Ubuntu one can install GraphViz using apt-get::
 
    sudo apt-get install graphviz
 
